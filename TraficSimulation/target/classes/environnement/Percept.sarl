@@ -1,0 +1,23 @@
+/** 
+ * Tous les objets perçus par l'agent
+ */
+package environnement
+
+import org.arakhne.afc.math.geometry.d1.d.Point1d
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class Percept {
+	var type : String
+	var position : Point1d 
+	var speed : float
+	
+	new(type : String, position : Point1d, speed : float)
+	{
+		this.type = type
+		this.position = position
+		this.speed = speed
+	}
+}

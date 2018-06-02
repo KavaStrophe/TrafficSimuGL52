@@ -1,0 +1,98 @@
+package utils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOError;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.arakhne.afc.gis.io.shape.GISShapeFileReader;
+import org.arakhne.afc.gis.mapelement.MapElement;
+import org.arakhne.afc.gis.maplayer.MapElementLayer;
+import org.arakhne.afc.gis.maplayer.TreeMapElementLayer;
+import org.arakhne.afc.gis.road.RoadPolyline;
+import org.arakhne.afc.gis.road.StandardRoadNetwork;
+import org.arakhne.afc.gis.road.layer.RoadNetworkLayer;
+import org.arakhne.afc.gis.road.primitive.RoadNetworkException;
+import org.arakhne.afc.io.dbase.DBaseFileFilter;
+import org.arakhne.afc.io.shape.ESRIBounds;
+import org.arakhne.afc.io.shape.ShapeElementType;
+import org.arakhne.afc.math.geometry.d2.d.Rectangle2d;
+import org.arakhne.afc.vmutil.FileSystem;
+
+import traficWindow.RoadRenderer;
+
+public class Loader {
+	public static StandardRoadNetwork loadShapeFile(String fileDesc) {
+		File file;
+		
+		try {
+			file = new File(RoadRenderer.class.getResource("ressources/Belfort.shp").toURI());
+		} catch(URISyntaxException e) {
+			file = new File(RoadRenderer.class.getResource("ressources/Belfort.shp").getPath());
+		} 
+		
+		try {
+			StandardRoadNetwork network = null;
+			MapElementLayer<MapElement> layer = null;
+
+			final File dbfFile = FileSystem.replaceExtension(file, DBaseFileFilter.EXTENSION_DBASE_FILE);
+			final URL dbfUrl;
+			if (dbfFile.canRead()) {
+				dbfUrl = dbfFile.toURI().toURL();
+			} else {
+				dbfUrl = null;
+			}
+
+			try (InputStream is = new FileInputStream(file)) {
+				assert is != null;
+				try (GISShapeFileReader reader = new GISShapeFileReader(is, null, dbfUrl)) {
+					final Rectangle2d worldRect = new Rectangle2d();
+					final ESRIBounds esriBounds = reader.getBoundsFromHeader();
+					worldRect.setFromCorners(
+							esriBounds.getMinX(),
+							esriBounds.getMinY(),
+							esriBounds.getMaxX(),
+							esriBounds.getMaxY());
+
+					if (reader.getShapeElementType() == ShapeElementType.POLYLINE) {
+						reader.setMapElementType(RoadPolyline.class);
+					}
+
+					MapElement element;
+
+					while ((element = reader.read()) != null) {
+						if (element instanceof RoadPolyline) {
+							if (network == null) {
+								network = new StandardRoadNetwork(worldRect);
+							}
+							final RoadPolyline sgmt = (RoadPolyline) element;
+							try {
+								network.addRoadSegment(sgmt);
+							} catch (RoadNetworkException e) {
+								throw new RuntimeException(e);
+							}
+						} else {
+							if (layer == null) {
+								layer = new TreeMapElementLayer<>(worldRect);
+							}
+							try {
+								layer.addMapElement(element);
+							} catch (RoadNetworkException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+				}
+			}
+			if (network != null) {
+				return network;
+			}
+			return network;
+		} catch (IOException exception) {
+			throw new IOError(exception);
+		}
+	}
+}

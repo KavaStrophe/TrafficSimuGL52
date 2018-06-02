@@ -1,0 +1,50 @@
+/** 
+ * Agent conducteur possédant un corps (Car)
+ */
+package ^agent
+
+import io.sarl.core.AgentKilled
+import io.sarl.core.AgentSpawned
+import io.sarl.core.ContextJoined
+import io.sarl.core.ContextLeft
+import io.sarl.core.Destroy
+import io.sarl.core.Initialize
+import io.sarl.core.Logging
+import io.sarl.core.MemberJoined
+import io.sarl.core.MemberLeft
+import java.util.UUID
+import environnement.Car
+import io.sarl.core.Lifecycle
+import java.util.ArrayList
+import environnement.Percept
+import events.NeedInfluence
+import environnement.InfluenceAgent
+
+/** 
+ * @author Nicolas
+ * 
+ */
+agent Conducteur {
+	uses Logging
+	uses Lifecycle
+	
+	var percepts : ArrayList<Percept>
+	var influence : InfluenceAgent
+	
+	on Initialize {
+		
+	}
+
+	on Destroy {
+		killMe
+	}
+	
+	/* Reçu à la fin du traitement des perceptions par l'environnement */
+	on NeedInfluence{
+		this.percepts = occurrence.percepts
+	}
+	
+	def computeInfluence()
+	{
+	}
+}

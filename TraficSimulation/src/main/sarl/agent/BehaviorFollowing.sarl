@@ -1,0 +1,49 @@
+/** 
+ * 
+ */
+package ^agent
+
+/** 
+ * @author Nicolas
+ * 
+ * Comportement que le conducteur adoptera lorsqu'une voiture se situera dans son champs de vision
+ */
+class BehaviorFollowing {
+	def computeIDM(
+		maxAccAgent : float, //the maximal acceleration
+		maxDesAgent : float, //the comfortable braking deceleration
+		distanceFromObject : float, //the distance to the ahead object
+		objectSpeed : float, 
+		currSpeed : float,
+		idealSpeed : float
+	) : float
+	{
+		var finalSpeed : float;
+		
+		var safetyDistance = (currSpeed / 10) * 6
+		System.out.println("Safety Distance : " + safetyDistance)
+		var diffSpeed = currSpeed - objectSpeed
+		if (diffSpeed < 0)
+			diffSpeed = diffSpeed * -1
+		System.out.println("Diff Vitesse : " + diffSpeed)
+		var timeBeforeCollision = distanceFromObject / currSpeed
+		System.out.println("timeBeforeCollision : " + timeBeforeCollision)
+		
+		finalSpeed = (safetyDistance + currSpeed * (timeBeforeCollision)) / distanceFromObject
+		System.out.println("First step : " + finalSpeed)
+		
+		finalSpeed +=
+			(currSpeed * diffSpeed) / (2 * distanceFromObject * Math.sqrt(maxAccAgent * maxDesAgent)).floatValue
+		System.out.println("Second step : " + finalSpeed)
+		
+		finalSpeed = Math.pow(finalSpeed, 2).floatValue
+		System.out.println("Third step : " + finalSpeed)
+		
+		finalSpeed = 1 - Math.pow(currSpeed / idealSpeed, 4).floatValue - finalSpeed
+		System.out.println("Fourth step : " + finalSpeed)
+		
+		finalSpeed = maxAccAgent * finalSpeed
+		
+		return finalSpeed
+	}
+}

@@ -1,0 +1,48 @@
+/** 
+ * Modèle indiquant les propriétés génériques que doivent posséder les Cars l'employant
+ */
+package configurationWindow
+
+import javafx.scene.paint.Color
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class CarModel { 
+	var length : float
+	var maxLinearSpeed : float
+	var maxLinearAcceleration : float
+	var color : Color
+	var maxCountOfModel : int
+	
+	new(length : float, maxSpeed : float, maxAcc : float, color : Color, maxNb : int)
+	{
+		this.length = length
+		this.maxLinearSpeed = maxSpeed
+		this.maxLinearAcceleration = maxAcc
+		this.color = color
+		this.maxCountOfModel = maxNb
+	}
+	
+	def getLength : float
+	{
+		return this.length
+	}
+	def getMaxSpeed : float
+	{
+		return this.maxLinearSpeed
+	}
+	def getMaxAcc : float
+	{
+		return this.maxLinearAcceleration
+	}
+	def getColor : Color
+	{
+		return this.color
+	}
+	def getMaxModel
+	{
+		return this.maxCountOfModel
+	}
+}

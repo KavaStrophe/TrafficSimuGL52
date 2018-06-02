@@ -1,0 +1,21 @@
+/** 
+ * 
+ */
+package events
+
+import java.util.ArrayList
+import environnement.Percept
+
+/** 
+ * @author Nicolas
+ * 
+ */
+event NeedInfluence
+{
+	var percepts : ArrayList<Percept>
+	
+	new(percepts : ArrayList<Percept>)
+	{
+		this.percepts = percepts
+	}
+}

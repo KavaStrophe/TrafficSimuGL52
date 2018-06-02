@@ -1,0 +1,11 @@
+/** 
+ * 
+ */
+package ^agent
+
+/** 
+ * @author Nicolas
+ *  Comportement qui s'exécutera lorsque le conducteur n'aura aucune autre voiture dans son champ de vision
+ */
+class BehaviorSeeking {
+}

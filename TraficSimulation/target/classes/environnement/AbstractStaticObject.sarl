@@ -1,0 +1,47 @@
+/** 
+ * Tous les objets immobiles se situant sur la route
+ */
+package environnement
+
+import java.util.UUID
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import org.arakhne.afc.math.geometry.d1.d.Point1d
+
+/** 
+ * @author Nicolas
+ * 
+ */
+abstract class AbstractStaticObject {
+	var position : Point1d
+	var id : UUID
+	var length : float
+	var entryPoint : RoadConnection
+	
+	new (id : UUID, position : Point1d, lenght : float)
+	{
+		this.id = id
+		this.position = position
+		this.length = length
+	}
+	
+	def onSameSegment(object : AbstractStaticObject) : Boolean
+	{
+		if(this.position.getSegment === object.position.getSegment &&
+		this.entryPoint === object.entryPoint)
+			return true
+		else
+			return false
+	}
+	def setLength(length : float)
+	{
+		this.length = length
+	}
+	def getPosition : Point1d
+	{
+		return this.position
+	}
+	def setPosition(position : Point1d)
+	{
+		this.position = position 
+	}
+}

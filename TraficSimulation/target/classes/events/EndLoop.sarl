@@ -1,0 +1,11 @@
+/** 
+ * Evènement de fin de boucle
+ */
+package events
+
+/** 
+ * @author Nicolas
+ * 
+ */
+event EndLoop
+

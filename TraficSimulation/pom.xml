@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>ia51.project</groupId>
+	<artifactId>trafficsimulation</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>trafficsimulation</name>
+	<url>https://github.com/pinam45/UTBM_IA51_TrafficSimulation</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<sarl.version>0.7.2</sarl.version>
+		<janus.version>2.0.7.2</janus.version>
+		<junit.version>4.12</junit.version>
+		<afc.version>15.0-SNAPSHOT</afc.version>
+	</properties>
+
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/io.sarl.maven/io.sarl.maven.sdk -->
+		<dependency>
+			<groupId>io.sarl.maven</groupId>
+			<artifactId>io.sarl.maven.sdk</artifactId>
+			<version>${sarl.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/io.janusproject/io.janusproject.kernel -->
+		<!-- <dependency>
+		    <groupId>io.janusproject</groupId>
+		    <artifactId>io.janusproject.kernel</artifactId>
+		    <version>${janus.version}</version>
+		</dependency> -->
+
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		    <version>${junit.version}</version>
+		    <scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.arakhne.afc.core/mathgraph -->
+		<dependency>
+			<groupId>org.arakhne.afc.core</groupId>
+			<artifactId>mathgraph</artifactId>
+			<version>${afc.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.arakhne.afc.gis/gisroad -->
+		<dependency>
+		    <groupId>org.arakhne.afc.gis</groupId>
+		    <artifactId>gisroad</artifactId>
+		    <version>${afc.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.arakhne.afc.gis/gisinputoutput -->
+		<dependency>
+		    <groupId>org.arakhne.afc.gis</groupId>
+		    <artifactId>gisinputoutput</artifactId>
+		    <version>${afc.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.arakhne.afc.gis</groupId>
+		    <artifactId>gisroadui</artifactId>
+		    <version>${afc.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.arakhne.afc.gis.ui</groupId>
+			<artifactId>gisroadfx</artifactId>
+			<version>${afc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.arakhne.afc.core</groupId>
+			<artifactId>vmutils</artifactId>
+			<version>${afc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.arakhne.afc.core</groupId>
+			<artifactId>util</artifactId>
+			<version>${afc.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>io.sarl.maven</groupId>
+				<artifactId>sarl-maven-plugin</artifactId>
+				<version>${sarl.version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<repositories>
+		<repository>
+			<id>devel-server</id>
+			<url>http://download.tuxfamily.org/arakhne/maven</url>
+		</repository>
+	</repositories>
+	
+</project>

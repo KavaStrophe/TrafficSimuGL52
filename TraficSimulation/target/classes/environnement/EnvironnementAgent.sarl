@@ -1,0 +1,156 @@
+/** 
+ * Agent d'environnement à lancer pour démarrer la simulation
+ */
+package environnement
+
+import ^agent.Conducteur
+import configurationWindow.ConfRenderer
+import events.BeginLoop
+import events.EndLoop
+import events.NeedInfluence
+import events.SendedInfluence
+import events.TargetReached
+import io.sarl.core.Behaviors
+import io.sarl.core.DefaultContextInteractions
+import io.sarl.core.Destroy
+import io.sarl.core.Initialize
+import io.sarl.core.Logging
+import io.sarl.util.IdentifierScope
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.UUID
+import org.arakhne.afc.gis.road.StandardRoadNetwork
+import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
+import org.arakhne.afc.math.geometry.d1.d.Point1d
+import traficWindow.RoadRenderer
+import utils.Loader
+
+import static traficWindow.RoadRenderer.*
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+
+/** 
+ * @author Nicolas
+ * 
+ */
+agent EnvironnementAgent {
+	uses DefaultContextInteractions
+	uses Logging
+	uses Behaviors
+	
+	var roadNetwork : StandardRoadNetwork
+	var agents : ArrayList<UUID> = new ArrayList<UUID>
+	var agentBodies : HashMap<UUID, Car> = new HashMap<UUID, Car> 
+	var influences : HashMap<UUID, InfluenceAgent> = new HashMap<UUID, InfluenceAgent>
+	var impasses : ArrayList<RoadConnection> = new ArrayList<RoadConnection>
+	var crois2 : ArrayList<RoadConnection> = new ArrayList<RoadConnection> //Croisement entre 3 routes
+	var crois3 : ArrayList<RoadConnection> = new ArrayList<RoadConnection> //Croisement entre au moins 4 routes
+	
+	on Initialize {
+		this.roadNetwork = Loader.loadShapeFile("ressources/Belfort.shp")
+		
+		loadPotentialPanelPositions()
+		
+		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
+		RoadRenderer.render()
+		ConfRenderer.render()
+		
+		
+		wake(new BeginLoop)
+	}
+	
+	on BeginLoop
+	{
+		this.influences = new HashMap<UUID, InfluenceAgent>()
+		computePerceptions()
+	}
+	on EndLoop
+	{
+		for(conduc : this.agents)
+		{
+			if(this.agentBodies.containsKey(conduc)){
+				consumeInfluence(agentBodies.get(conduc), influences.get(conduc))
+			}
+		}
+		Thread.sleep(150)
+		wake(new BeginLoop)
+	}
+	
+	on SendedInfluence
+	{
+		this.influences.put(occurrence.source.UUID, occurrence.influence)
+		if(this.influences.size() == this.agentBodies.size())
+		{
+			wake(new EndLoop)
+		}
+	}
+	
+	on TargetReached
+	{
+		var id = occurrence.source.UUID
+		removeAgent(id)
+	}
+	
+	
+	def addAgent(car : Car)
+	{
+		var id = spawn(Conducteur)
+		this.agents.add(id)
+		this.agentBodies.put(id, car)
+		car.position 
+	}
+	def removeAgent(id : UUID)
+	{
+		this.agentBodies.remove(id)
+		this.agents.remove(id)
+		emit(new Destroy(), new IdentifierScope(id))
+	}
+	
+	
+	def computePerceptions()
+	{
+		var percepts = new ArrayList<Percept>()
+		for(id : this.agents)
+		{
+			if (this.agentBodies.containsKey(id)){
+				percepts = computePerceptionsFor(this.agentBodies.get(id))
+				emit(new NeedInfluence(percepts), new IdentifierScope(id))
+			}
+		}
+	}
+	def computePerceptionsFor(body : Car) : ArrayList<Percept>
+	{
+		return new ArrayList<Percept>
+	}
+
+	def consumeInfluence(car : Car, ^agent : InfluenceAgent) {
+		
+	}
+
+	def loadPotentialPanelPositions {
+		var allSegments = this.roadNetwork.getRoadSegments
+		
+		for (segment : allSegments) {
+			var firstPoint = segment.getBeginPoint
+			if (!impasses.contains(firstPoint) && !crois2.contains(firstPoint) && !crois3.contains(firstPoint)) {
+				if (firstPoint.isFinalConnectionPoint) {
+					this.impasses.add(firstPoint)
+				} else if (firstPoint.getConnectedSegmentCount == 3) {
+					this.crois2.add(firstPoint)
+				} else if (firstPoint.getConnectedSegmentCount > 3) {
+					this.crois3.add(firstPoint)
+				}
+			}
+
+			var lastPoint = segment.getEndPoint
+			if (!impasses.contains(firstPoint) && !crois2.contains(firstPoint) && !crois3.contains(firstPoint)) {
+				if (lastPoint.isFinalConnectionPoint) {
+					this.impasses.add(lastPoint)
+				} else if (lastPoint.getConnectedSegmentCount == 3) {
+					this.crois2.add(lastPoint)
+				} else if (lastPoint.getConnectedSegmentCount > 3) {
+					this.crois3.add(lastPoint)
+				}
+			}
+		}
+	}
+}
