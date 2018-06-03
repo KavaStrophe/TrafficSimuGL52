@@ -71,7 +71,7 @@ public class RoadRenderer extends Application {
 	public void start(Stage primaryStage) {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
-		layer.addMapLayer(this.carLayer);
+		//layer.addMapLayer(this.carLayer);
 		
 		final GISContainer container;
 		container = layer;

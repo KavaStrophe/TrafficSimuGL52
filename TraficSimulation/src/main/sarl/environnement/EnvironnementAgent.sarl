@@ -54,7 +54,6 @@ agent EnvironnementAgent {
 		RoadRenderer.render()
 		ConfRenderer.render()
 		
-		
 		wake(new BeginLoop)
 	}
 	
