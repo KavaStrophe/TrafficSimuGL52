@@ -9,8 +9,8 @@ import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
 import java.util.ArrayList;
 import java.util.UUID;
+import org.arakhne.afc.gis.road.primitive.RoadConnection;
 import org.arakhne.afc.gis.road.primitive.RoadSegment;
-import org.arakhne.afc.math.geometry.d1.d.Point1d;
 import org.eclipse.xtext.xbase.lib.Pure;
 
 /**
@@ -24,18 +24,24 @@ public abstract class AbstractMobileObject extends AbstractStaticObject {
   
   private float maxLinearAcceleration;
   
+  private float maxLinearDesceleration;
+  
   private ArrayList<RoadSegment> targets;
   
   private float currentLinearSpeed = 0;
   
-  private float currentLinearAcceleration = 0;
-  
-  public AbstractMobileObject(final UUID id, final float length, final Point1d position, final float maxSpeed, final float maxAcc) {
-    super(id, position, length);
+  public AbstractMobileObject(final UUID id, final float length, final RoadConnection point, final float maxSpeed, final float maxAcc, final float minAcc) {
+    super(id, point, length);
     this.maxLinearSpeed = maxSpeed;
     this.maxLinearAcceleration = maxAcc;
+    this.maxLinearDesceleration = minAcc;
     ArrayList<RoadSegment> _arrayList = new ArrayList<RoadSegment>();
     this.targets = _arrayList;
+  }
+  
+  @Pure
+  public float getSpeed() {
+    return this.currentLinearSpeed;
   }
   
   public void setMaxSpeed(final float maxSpeed) {
@@ -48,15 +54,6 @@ public abstract class AbstractMobileObject extends AbstractStaticObject {
   
   public void setCurrSpeed(final float speed) {
     this.currentLinearSpeed = speed;
-  }
-  
-  public void setCurrAcc(final float acceleration) {
-    this.currentLinearAcceleration = acceleration;
-  }
-  
-  @Pure
-  public Point1d move(final Point1d position, final float simulationDuration) {
-    return null;
   }
   
   @Override
@@ -74,9 +71,9 @@ public abstract class AbstractMobileObject extends AbstractStaticObject {
       return false;
     if (Float.floatToIntBits(other.maxLinearAcceleration) != Float.floatToIntBits(this.maxLinearAcceleration))
       return false;
-    if (Float.floatToIntBits(other.currentLinearSpeed) != Float.floatToIntBits(this.currentLinearSpeed))
+    if (Float.floatToIntBits(other.maxLinearDesceleration) != Float.floatToIntBits(this.maxLinearDesceleration))
       return false;
-    if (Float.floatToIntBits(other.currentLinearAcceleration) != Float.floatToIntBits(this.currentLinearAcceleration))
+    if (Float.floatToIntBits(other.currentLinearSpeed) != Float.floatToIntBits(this.currentLinearSpeed))
       return false;
     return super.equals(obj);
   }
@@ -89,8 +86,8 @@ public abstract class AbstractMobileObject extends AbstractStaticObject {
     final int prime = 31;
     result = prime * result + Float.floatToIntBits(this.maxLinearSpeed);
     result = prime * result + Float.floatToIntBits(this.maxLinearAcceleration);
+    result = prime * result + Float.floatToIntBits(this.maxLinearDesceleration);
     result = prime * result + Float.floatToIntBits(this.currentLinearSpeed);
-    result = prime * result + Float.floatToIntBits(this.currentLinearAcceleration);
     return result;
   }
 }

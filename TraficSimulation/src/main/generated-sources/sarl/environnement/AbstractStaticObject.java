@@ -3,12 +3,13 @@
  */
 package environnement;
 
+import com.google.common.base.Objects;
 import io.sarl.lang.annotation.SarlElementType;
 import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
-import java.util.Objects;
 import java.util.UUID;
 import org.arakhne.afc.gis.road.primitive.RoadConnection;
+import org.arakhne.afc.gis.road.primitive.RoadSegment;
 import org.arakhne.afc.math.geometry.d1.d.Point1d;
 import org.eclipse.xtext.xbase.lib.Pure;
 
@@ -19,7 +20,7 @@ import org.eclipse.xtext.xbase.lib.Pure;
 @SarlElementType(10)
 @SuppressWarnings("all")
 public abstract class AbstractStaticObject {
-  private Point1d position;
+  private float position;
   
   private UUID id;
   
@@ -27,15 +28,25 @@ public abstract class AbstractStaticObject {
   
   private RoadConnection entryPoint;
   
-  public AbstractStaticObject(final UUID id, final Point1d position, final float lenght) {
+  private RoadSegment segment;
+  
+  public AbstractStaticObject(final UUID id, final RoadConnection point, final float lenght) {
+    this.segment = point.getConnectedSegment(0);
+    this.entryPoint = point;
     this.id = id;
-    this.position = position;
+    RoadConnection _beginPoint = this.segment.getBeginPoint();
+    boolean _equals = Objects.equal(point, _beginPoint);
+    if (_equals) {
+      this.position = 0;
+    } else {
+      this.position = Double.valueOf(this.segment.getLength()).floatValue();
+    }
     this.length = this.length;
   }
   
   @Pure
   public Boolean onSameSegment(final AbstractStaticObject object) {
-    if (((this.position.getSegment() == object.position.getSegment()) && 
+    if (((this.segment == object.segment) && 
       (this.entryPoint == object.entryPoint))) {
       return Boolean.valueOf(true);
     } else {
@@ -48,12 +59,35 @@ public abstract class AbstractStaticObject {
   }
   
   @Pure
-  public Point1d getPosition() {
+  public float getPosition() {
     return this.position;
   }
   
   public void setPosition(final Point1d position) {
-    this.position = position;
+    this.setPosition(position);
+  }
+  
+  @Pure
+  public UUID getID() {
+    return this.id;
+  }
+  
+  public void setSegment(final RoadSegment segment) {
+    this.segment = segment;
+  }
+  
+  @Pure
+  public RoadSegment getSegment() {
+    return this.segment;
+  }
+  
+  public void setEntryPoint(final RoadConnection point) {
+    this.entryPoint = point;
+  }
+  
+  @Pure
+  public RoadConnection getEntryPoint() {
+    return this.entryPoint;
   }
   
   @Override
@@ -67,7 +101,9 @@ public abstract class AbstractStaticObject {
     if (getClass() != obj.getClass())
       return false;
     AbstractStaticObject other = (AbstractStaticObject) obj;
-    if (!Objects.equals(this.id, other.id)) {
+    if (Float.floatToIntBits(other.position) != Float.floatToIntBits(this.position))
+      return false;
+    if (!java.util.Objects.equals(this.id, other.id)) {
       return false;
     }
     if (Float.floatToIntBits(other.length) != Float.floatToIntBits(this.length))
@@ -81,7 +117,8 @@ public abstract class AbstractStaticObject {
   public int hashCode() {
     int result = super.hashCode();
     final int prime = 31;
-    result = prime * result + Objects.hashCode(this.id);
+    result = prime * result + Float.floatToIntBits(this.position);
+    result = prime * result + java.util.Objects.hashCode(this.id);
     result = prime * result + Float.floatToIntBits(this.length);
     return result;
   }

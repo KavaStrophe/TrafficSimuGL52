@@ -1,6 +1,6 @@
 package tests;
 
-import agent.BehaviorFollowing;
+import agent.BehaviorSeeking;
 import io.sarl.core.AgentKilled;
 import io.sarl.core.AgentSpawned;
 import io.sarl.core.ContextJoined;
@@ -36,7 +36,7 @@ import org.eclipse.xtext.xbase.lib.Pure;
 public class Test extends Agent {
   @SyntheticMember
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
-    float _computeIDM = new BehaviorFollowing().computeIDM(10, 10, 50, 70, 70, 100);
+    float _computeIDM = new BehaviorSeeking().computeIDM(10, 10, 100, 90);
     String _plus = ("Final step : " + Float.valueOf(_computeIDM));
     System.out.println(_plus);
   }

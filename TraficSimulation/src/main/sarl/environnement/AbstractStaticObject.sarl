@@ -6,42 +6,69 @@ package environnement
 import java.util.UUID
 import org.arakhne.afc.gis.road.primitive.RoadConnection
 import org.arakhne.afc.math.geometry.d1.d.Point1d
+import org.arakhne.afc.gis.road.primitive.RoadSegment
 
 /** 
  * @author Nicolas
  * 
  */
 abstract class AbstractStaticObject {
-	var position : Point1d
+	var position : float
 	var id : UUID
 	var length : float
 	var entryPoint : RoadConnection
+	var segment : RoadSegment
 	
-	new (id : UUID, position : Point1d, lenght : float)
+	new (id : UUID, point : RoadConnection, lenght : float)
 	{
+		this.segment = point.getConnectedSegment(0)
+		this.entryPoint = point
 		this.id = id
-		this.position = position
+		if (point == this.segment.getBeginPoint)
+			this.position = 0
+		else
+			this.position = this.segment.getLength.floatValue
 		this.length = length
 	}
 	
 	def onSameSegment(object : AbstractStaticObject) : Boolean
 	{
-		if(this.position.getSegment === object.position.getSegment &&
+		if (this.segment === object.segment &&
 		this.entryPoint === object.entryPoint)
 			return true
-		else
+		else 
 			return false
-	}
+	} 
 	def setLength(length : float)
 	{
 		this.length = length
 	}
-	def getPosition : Point1d
+	def getPosition : float
 	{
 		return this.position
 	}
 	def setPosition(position : Point1d)
 	{
 		this.position = position 
+	}
+	def getID : UUID
+	{
+		return this.id
+	}
+	def setSegment(segment : RoadSegment)
+	{
+		this.segment = segment
+	}
+	def getSegment : RoadSegment
+	{
+		return this.segment 
+	}
+	def setEntryPoint(point : RoadConnection)
+	{
+		this.entryPoint = point
+	}
+
+	def getEntryPoint() : RoadConnection {
+		return this.entryPoint
 	}
 }

@@ -6,8 +6,7 @@ package environnement;
 import io.sarl.lang.annotation.SarlElementType;
 import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
-import java.util.List;
-import org.arakhne.afc.gis.road.primitive.RoadSegment;
+import org.arakhne.afc.gis.road.path.RoadPath;
 import org.eclipse.xtext.xbase.lib.Pure;
 
 /**
@@ -19,9 +18,9 @@ import org.eclipse.xtext.xbase.lib.Pure;
 public class InfluenceAgent {
   private float acceleration;
   
-  private List<RoadSegment> roads;
+  private RoadPath roads;
   
-  public InfluenceAgent(final List<RoadSegment> roads, final float acceleration) {
+  public InfluenceAgent(final RoadPath roads, final float acceleration) {
     this.acceleration = acceleration;
     this.roads = roads;
   }

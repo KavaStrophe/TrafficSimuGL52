@@ -1,11 +1,12 @@
 package events;
 
-import environnement.Percept;
+import environnement.Car;
 import io.sarl.lang.annotation.SarlElementType;
 import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
 import io.sarl.lang.core.Event;
 import java.util.ArrayList;
+import org.arakhne.afc.gis.road.primitive.RoadSegment;
 import org.eclipse.xtext.xbase.lib.Pure;
 import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 
@@ -16,10 +17,13 @@ import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
 @SarlElementType(15)
 @SuppressWarnings("all")
 public class NeedInfluence extends Event {
-  public ArrayList<Percept> percepts;
+  public ArrayList<RoadSegment> percepts;
   
-  public NeedInfluence(final ArrayList<Percept> percepts) {
+  public Car body;
+  
+  public NeedInfluence(final ArrayList<RoadSegment> percepts, final Car body) {
     this.percepts = percepts;
+    this.body = body;
   }
   
   @Override
@@ -45,8 +49,9 @@ public class NeedInfluence extends Event {
   protected void toString(final ToStringBuilder builder) {
     super.toString(builder);
     builder.add("percepts", this.percepts);
+    builder.add("body", this.body);
   }
   
   @SyntheticMember
-  private final static long serialVersionUID = -1529845899L;
+  private final static long serialVersionUID = -1544178711L;
 }

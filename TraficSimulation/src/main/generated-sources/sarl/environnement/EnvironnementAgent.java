@@ -4,12 +4,15 @@
 package environnement;
 
 import agent.Conducteur;
+import com.google.common.base.Objects;
+import configurationWindow.CarModel;
 import configurationWindow.ConfRenderer;
 import environnement.Car;
 import environnement.InfluenceAgent;
-import environnement.Percept;
 import events.BeginLoop;
 import events.EndLoop;
+import events.GPSPath;
+import events.GPSPathReturn;
 import events.NeedInfluence;
 import events.SendedInfluence;
 import events.TargetReached;
@@ -36,9 +39,10 @@ import java.util.UUID;
 import javax.inject.Inject;
 import org.arakhne.afc.gis.road.StandardRoadNetwork;
 import org.arakhne.afc.gis.road.layer.RoadNetworkLayer;
+import org.arakhne.afc.gis.road.path.RoadPath;
+import org.arakhne.afc.gis.road.path.astar.RoadAStar;
 import org.arakhne.afc.gis.road.primitive.RoadConnection;
 import org.arakhne.afc.gis.road.primitive.RoadSegment;
-import org.arakhne.afc.math.geometry.d1.d.Point1d;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Inline;
@@ -69,15 +73,12 @@ public class EnvironnementAgent extends Agent {
   
   @SyntheticMember
   private void $behaviorUnit$Initialize$0(final Initialize occurrence) {
-    this.roadNetwork = Loader.loadShapeFile("ressources/Belfort.shp");
-    this.loadPotentialPanelPositions();
+    this.roadNetwork = Loader.loadShapeFile("ressources/ciechanow.shp");
+    Collection<? extends RoadSegment> segments = this.roadNetwork.getRoadSegments();
     RoadNetworkLayer _roadNetworkLayer = new RoadNetworkLayer(this.roadNetwork);
     RoadRenderer.roadLayer = _roadNetworkLayer;
     RoadRenderer.render();
     ConfRenderer.render();
-    Behaviors _$CAPACITY_USE$IO_SARL_CORE_BEHAVIORS$CALLER = this.$castSkill(Behaviors.class, (this.$CAPACITY_USE$IO_SARL_CORE_BEHAVIORS == null || this.$CAPACITY_USE$IO_SARL_CORE_BEHAVIORS.get() == null) ? (this.$CAPACITY_USE$IO_SARL_CORE_BEHAVIORS = this.$getSkill(Behaviors.class)) : this.$CAPACITY_USE$IO_SARL_CORE_BEHAVIORS);
-    BeginLoop _beginLoop = new BeginLoop();
-    _$CAPACITY_USE$IO_SARL_CORE_BEHAVIORS$CALLER.wake(_beginLoop);
   }
   
   @SyntheticMember
@@ -124,14 +125,42 @@ public class EnvironnementAgent extends Agent {
     this.removeAgent(id);
   }
   
-  protected Point1d addAgent(final Car car) {
-    Point1d _xblockexpression = null;
+  @SyntheticMember
+  private void $behaviorUnit$GPSPath$5(final GPSPath occurrence) {
+    RoadPath roads = null;
+    Car _get = this.agentBodies.get(occurrence.getSource().getUUID());
+    boolean _notEquals = (!Objects.equal(_get, null));
+    if (_notEquals) {
+      RoadConnection entryPoint = this.agentBodies.get(occurrence.getSource().getUUID()).getEntryPoint();
+      RoadConnection finalPoint = null;
+      do {
+        double _random = Math.random();
+        int _size = this.impasses.size();
+        double _multiply = (_random * _size);
+        finalPoint = this.impasses.get(Long.valueOf(Math.round(_multiply)).intValue());
+      } while(Objects.equal(finalPoint, entryPoint));
+      RoadAStar aStar = new RoadAStar();
+      roads = aStar.solve(entryPoint.getPoint(), finalPoint, this.roadNetwork);
+    }
+    DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$castSkill(DefaultContextInteractions.class, (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS == null || this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS.get() == null) ? (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS = this.$getSkill(DefaultContextInteractions.class)) : this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS);
+    GPSPathReturn _gPSPathReturn = new GPSPathReturn(roads);
+    _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_gPSPathReturn);
+  }
+  
+  protected Car addAgent(final CarModel model) {
+    Car _xblockexpression = null;
     {
       DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$castSkill(DefaultContextInteractions.class, (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS == null || this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS.get() == null) ? (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS = this.$getSkill(DefaultContextInteractions.class)) : this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS);
       UUID id = _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.spawn(Conducteur.class);
+      double _random = Math.random();
+      int _size = this.impasses.size();
+      double _multiply = (_random * _size);
+      int numSpawner = Double.valueOf(Math.floor(_multiply)).intValue();
+      UUID _randomUUID = UUID.randomUUID();
+      RoadConnection _get = this.impasses.get(numSpawner);
+      Car car = new Car(_randomUUID, _get, model);
       this.agents.add(id);
-      this.agentBodies.put(id, car);
-      _xblockexpression = car.getPosition();
+      _xblockexpression = this.agentBodies.put(id, car);
     }
     return _xblockexpression;
   }
@@ -146,13 +175,13 @@ public class EnvironnementAgent extends Agent {
   }
   
   protected void computePerceptions() {
-    ArrayList<Percept> percepts = new ArrayList<Percept>();
     for (final UUID id : this.agents) {
       boolean _containsKey = this.agentBodies.containsKey(id);
       if (_containsKey) {
-        percepts = this.computePerceptionsFor(this.agentBodies.get(id));
+        Car agentBody = this.agentBodies.get(id);
+        ArrayList<RoadSegment> percepts = this.computePerceptionsFor(agentBody);
         DefaultContextInteractions _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER = this.$castSkill(DefaultContextInteractions.class, (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS == null || this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS.get() == null) ? (this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS = this.$getSkill(DefaultContextInteractions.class)) : this.$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS);
-        NeedInfluence _needInfluence = new NeedInfluence(percepts);
+        NeedInfluence _needInfluence = new NeedInfluence(percepts, agentBody);
         IdentifierScope _identifierScope = new IdentifierScope(id);
         _$CAPACITY_USE$IO_SARL_CORE_DEFAULTCONTEXTINTERACTIONS$CALLER.emit(_needInfluence, _identifierScope);
       }
@@ -160,8 +189,8 @@ public class EnvironnementAgent extends Agent {
   }
   
   @Pure
-  protected ArrayList<Percept> computePerceptionsFor(final Car body) {
-    return new ArrayList<Percept>();
+  protected ArrayList<RoadSegment> computePerceptionsFor(final Car body) {
+    return new ArrayList<RoadSegment>();
   }
   
   @Pure
@@ -281,6 +310,14 @@ public class EnvironnementAgent extends Agent {
     assert occurrence != null;
     assert ___SARLlocal_runnableCollection != null;
     ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$SendedInfluence$3(occurrence));
+  }
+  
+  @SyntheticMember
+  @PerceptGuardEvaluator
+  private void $guardEvaluator$GPSPath(final GPSPath occurrence, final Collection<Runnable> ___SARLlocal_runnableCollection) {
+    assert occurrence != null;
+    assert ___SARLlocal_runnableCollection != null;
+    ___SARLlocal_runnableCollection.add(() -> $behaviorUnit$GPSPath$5(occurrence));
   }
   
   @SyntheticMember

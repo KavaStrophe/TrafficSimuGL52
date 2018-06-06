@@ -13,6 +13,7 @@ class CarModel {
 	var length : float
 	var maxLinearSpeed : float
 	var maxLinearAcceleration : float
+	var maxLinearDesceleration : float
 	var color : Color
 	var maxCountOfModel : int
 	
@@ -34,7 +35,7 @@ class CarModel {
 		return this.maxLinearSpeed
 	}
 	def getMaxAcc : float
-	{
+	{ 
 		return this.maxLinearAcceleration
 	}
 	def getColor : Color
@@ -45,4 +46,8 @@ class CarModel {
 	{
 		return this.maxCountOfModel
 	}
+	def getMinAcc : float {
+		return this.maxLinearDesceleration
+	}
+	
 }

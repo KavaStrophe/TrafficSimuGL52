@@ -13,6 +13,7 @@ import io.sarl.core.Logging
 import io.sarl.core.MemberJoined
 import io.sarl.core.MemberLeft
 import ^agent.BehaviorFollowing
+import ^agent.BehaviorSeeking
 
 /** 
  * @author Nicolas
@@ -21,8 +22,8 @@ import ^agent.BehaviorFollowing
 agent Test {
 	uses Logging
 
-	on Initialize {
- 		System.out.println("Final step : " + new BehaviorFollowing().computeIDM(10, 10, 50, 70, 70, 100))
+	on Initialize { 
+ 		System.out.println("Final step : " + new BehaviorSeeking().computeIDM(10, 10, 100, 90))
  	}
 
 	on Destroy {

@@ -29,9 +29,9 @@ public class Loader {
 		File file;
 		
 		try {
-			file = new File(RoadRenderer.class.getResource("ressources/Belfort.shp").toURI());
+			file = new File(RoadRenderer.class.getResource(fileDesc).toURI());
 		} catch(URISyntaxException e) {
-			file = new File(RoadRenderer.class.getResource("ressources/Belfort.shp").getPath());
+			file = new File(RoadRenderer.class.getResource(fileDesc).getPath());
 		} 
 		
 		try {

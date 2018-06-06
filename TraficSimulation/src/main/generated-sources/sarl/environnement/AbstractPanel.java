@@ -8,7 +8,7 @@ import io.sarl.lang.annotation.SarlElementType;
 import io.sarl.lang.annotation.SarlSpecification;
 import io.sarl.lang.annotation.SyntheticMember;
 import java.util.UUID;
-import org.arakhne.afc.math.geometry.d1.d.Point1d;
+import org.arakhne.afc.gis.road.primitive.RoadConnection;
 
 /**
  * @author Nicolas
@@ -18,7 +18,7 @@ import org.arakhne.afc.math.geometry.d1.d.Point1d;
 @SuppressWarnings("all")
 public abstract class AbstractPanel extends AbstractStaticObject {
   @SyntheticMember
-  public AbstractPanel(final UUID id, final Point1d position, final float lenght) {
-    super(id, position, lenght);
+  public AbstractPanel(final UUID id, final RoadConnection point, final float lenght) {
+    super(id, point, lenght);
   }
 }

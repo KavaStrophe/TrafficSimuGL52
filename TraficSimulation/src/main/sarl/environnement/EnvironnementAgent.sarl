@@ -27,6 +27,12 @@ import utils.Loader
 
 import static traficWindow.RoadRenderer.*
 import org.arakhne.afc.gis.road.primitive.RoadConnection
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import configurationWindow.CarModel
+import events.GPSPath
+import events.GPSPathReturn
+import org.arakhne.afc.gis.road.path.RoadPath
+import org.arakhne.afc.gis.road.path.astar.RoadAStar
 
 /** 
  * @author Nicolas
@@ -46,15 +52,22 @@ agent EnvironnementAgent {
 	var crois3 : ArrayList<RoadConnection> = new ArrayList<RoadConnection> //Croisement entre au moins 4 routes
 	
 	on Initialize {
-		this.roadNetwork = Loader.loadShapeFile("ressources/Belfort.shp")
+		this.roadNetwork = Loader.loadShapeFile("ressources/ciechanow.shp")
 		
-		loadPotentialPanelPositions()
-		
+		// loadPotentialPanelPositions()
+		var segments = this.roadNetwork.getRoadSegments
+		/*for (segment : segments)
+		{
+			System.out.println("Nom : " + segment.getName + ", longueur : " + segment.getLength + ", type : " +
+				segment.getRoadType + ", num : " + segment.getRoadNumber)
+			System.out.println(segment.getName)
+		}*/
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		RoadRenderer.render()
 		ConfRenderer.render()
 		
-		wake(new BeginLoop)
+		
+		//wake(new BeginLoop)
 	}
 	
 	on BeginLoop
@@ -89,13 +102,32 @@ agent EnvironnementAgent {
 		removeAgent(id)
 	}
 	
+	on GPSPath
+	{
+		var roads : RoadPath = null
+		if (this.agentBodies.get(occurrence.getSource.UUID) != null)
+		{
+			var entryPoint = this.agentBodies.get(occurrence.getSource.UUID).entryPoint
+			var finalPoint : RoadConnection 
+			do
+			{
+				finalPoint = this.impasses.get(Math.round(Math.random() * this.impasses.size()).intValue)
+			}
+			while (finalPoint == entryPoint)
+
+			var aStar = new RoadAStar()
+			roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
+		}
+		emit(new GPSPathReturn(roads))
+	}
 	
-	def addAgent(car : Car)
+	def addAgent(model : CarModel)
 	{
 		var id = spawn(Conducteur)
+		var numSpawner = Math.floor(Math.random() * this.impasses.size()).intValue
+		var car = new Car(UUID.randomUUID, this.impasses.get(numSpawner) , model)
 		this.agents.add(id)
 		this.agentBodies.put(id, car)
-		car.position 
 	}
 	def removeAgent(id : UUID)
 	{
@@ -107,18 +139,20 @@ agent EnvironnementAgent {
 	
 	def computePerceptions()
 	{
-		var percepts = new ArrayList<Percept>()
 		for(id : this.agents)
 		{
 			if (this.agentBodies.containsKey(id)){
-				percepts = computePerceptionsFor(this.agentBodies.get(id))
-				emit(new NeedInfluence(percepts), new IdentifierScope(id))
+				var agentBody = this.agentBodies.get(id)
+				var percepts = computePerceptionsFor(agentBody)
+				emit(new NeedInfluence(percepts, agentBody), new IdentifierScope(id))
 			}
 		}
 	}
-	def computePerceptionsFor(body : Car) : ArrayList<Percept>
+	
+	
+	def computePerceptionsFor(body : Car) : ArrayList<RoadSegment>
 	{
-		return new ArrayList<Percept>
+		return new ArrayList<RoadSegment>
 	}
 
 	def consumeInfluence(car : Car, ^agent : InfluenceAgent) {

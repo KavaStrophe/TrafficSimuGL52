@@ -22,6 +22,8 @@ public class CarModel {
   
   private float maxLinearAcceleration;
   
+  private float maxLinearDesceleration;
+  
   private Color color;
   
   private int maxCountOfModel;
@@ -59,6 +61,11 @@ public class CarModel {
     return this.maxCountOfModel;
   }
   
+  @Pure
+  public float getMinAcc() {
+    return this.maxLinearDesceleration;
+  }
+  
   @Override
   @Pure
   @SyntheticMember
@@ -76,6 +83,8 @@ public class CarModel {
       return false;
     if (Float.floatToIntBits(other.maxLinearAcceleration) != Float.floatToIntBits(this.maxLinearAcceleration))
       return false;
+    if (Float.floatToIntBits(other.maxLinearDesceleration) != Float.floatToIntBits(this.maxLinearDesceleration))
+      return false;
     if (other.maxCountOfModel != this.maxCountOfModel)
       return false;
     return super.equals(obj);
@@ -90,6 +99,7 @@ public class CarModel {
     result = prime * result + Float.floatToIntBits(this.length);
     result = prime * result + Float.floatToIntBits(this.maxLinearSpeed);
     result = prime * result + Float.floatToIntBits(this.maxLinearAcceleration);
+    result = prime * result + Float.floatToIntBits(this.maxLinearDesceleration);
     result = prime * result + this.maxCountOfModel;
     return result;
   }
