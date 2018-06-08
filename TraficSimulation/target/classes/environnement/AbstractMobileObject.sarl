@@ -1,0 +1,49 @@
+/** 
+ * Tout objet mobile se trouvant sur la route
+ */
+package environnement
+
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import java.util.ArrayList
+import java.util.UUID
+import org.arakhne.afc.math.geometry.d1.d.Point1d
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+
+/** 
+ * @author Nicolas
+ * 
+ */
+abstract class AbstractMobileObject extends AbstractStaticObject {
+	var maxLinearSpeed : float
+	var maxLinearAcceleration : float
+	var maxLinearDesceleration : float 
+	var targets : ArrayList<RoadSegment>
+	
+	var currentLinearSpeed : float = 0 
+	
+	new (id : UUID, length : float, point : RoadConnection, maxSpeed : float, maxAcc : float, minAcc : float)
+	{
+		super(id, point, length)
+		this.maxLinearSpeed = maxSpeed
+		this.maxLinearAcceleration = maxAcc
+		this.maxLinearDesceleration = minAcc 
+		this.targets = new ArrayList<RoadSegment>()
+	}
+	
+	def getSpeed : float
+	{
+		return this.currentLinearSpeed
+	}
+	
+	def setMaxSpeed(maxSpeed : float)
+	{
+		this.maxLinearSpeed = maxSpeed
+	} 
+	def setMaxAcc(maxAcc : float) 
+	{
+		this.maxLinearAcceleration = maxAcc
+	}
+	def setCurrSpeed(speed : float) {
+		this.currentLinearSpeed = speed
+	}
+}

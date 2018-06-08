@@ -1,0 +1,29 @@
+/** 
+ * 
+ */
+package ^agent
+
+import environnement.Car
+
+/** 
+ * @author Nicolas
+ *  Comportement qui s'exécutera lorsque le conducteur n'aura aucune autre voiture dans son champ de vision
+ */
+class BehaviorSeeking {
+	def run(body : Car, maxSpeed : float) : float
+	{
+		return computeIDM(body.maxAcc, body.minAcc,  body.speed, maxSpeed)
+	}
+	
+	def computeIDM(maxAcc : float, minAcc : float, currSpeed : float, maxSpeed : float)
+	{
+		var firstStep = Math.pow((currSpeed  / maxSpeed), 4)
+		var finalStep = maxAcc * (1 - firstStep)
+		
+		if (finalStep < -1 * minAcc)
+			finalStep = minAcc
+		if (finalStep > maxAcc)
+			finalStep = maxAcc
+		return finalStep.floatValue
+	}
+}

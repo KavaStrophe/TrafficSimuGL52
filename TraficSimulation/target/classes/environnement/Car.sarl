@@ -1,0 +1,54 @@
+/** 
+ * Corps de l'agent Conducteur
+ */
+package environnement
+
+import configurationWindow.CarModel
+import java.util.UUID
+import javafx.scene.paint.Color
+import java.util.ArrayList
+import org.arakhne.afc.math.geometry.d1.d.Point1d
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+
+/**  
+ * @author Nicolas
+ * 
+ */
+class Car extends AbstractMobileObject{
+	var model : CarModel
+	var color : Color    
+	
+	new(id : UUID, length : float, point : RoadConnection, maxSpeed : float, maxAcc : float, minAcc : float, color : Color)
+	{
+		super(id, length, point, maxSpeed, maxAcc, minAcc)
+		this.model = null
+		this.color = color
+	} 
+
+	new(id : UUID, connect : RoadConnection, model : CarModel) { 
+		
+		this(id, model.length, connect, model.maxSpeed, model.maxAcc, model.minAcc, model.color) 
+	}
+	 
+	def setModel(model : CarModel)
+	{
+		this.color = model.color
+		this.length = model.length
+		this.maxSpeed = model.maxSpeed
+		this.maxAcc = model.maxAcc
+		this.model = model
+	} 
+	def getMaxSpeed : float
+	{
+		return this.model.maxSpeed
+	}
+
+	def getMaxAcc : float {
+		return this.model.maxAcc
+	}
+
+	def getMinAcc : float {
+		return this.model.minAcc
+	}
+	
+}

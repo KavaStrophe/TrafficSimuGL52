@@ -1,0 +1,23 @@
+/** 
+ * Influence retournée par l'agent
+ */
+package environnement
+
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import java.util.List
+import org.arakhne.afc.gis.road.path.RoadPath
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class InfluenceAgent { 
+	var acceleration : float
+	var roads : RoadPath
+	
+	new(roads : RoadPath, acceleration : float)
+	{
+		this.acceleration = acceleration
+		this.roads = roads
+	}
+}

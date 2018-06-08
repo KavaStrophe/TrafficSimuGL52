@@ -1,5 +1,0 @@
-TraficSimulation/src/main/generated-sources/*
-TraficSimulation/target/classes/*
-**/*.sarlbin
-**/*.class
-**/*._trace

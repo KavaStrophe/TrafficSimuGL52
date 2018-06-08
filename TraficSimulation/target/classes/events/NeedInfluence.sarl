@@ -1,0 +1,25 @@
+/** 
+ * 
+ */
+package events
+
+import java.util.ArrayList
+import environnement.Percept
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import environnement.Car
+
+/** 
+ * @author Nicolas
+ * 
+ */
+event NeedInfluence
+{
+	var percepts : ArrayList<RoadSegment>
+	var body : Car
+	
+	new(percepts : ArrayList<RoadSegment>, body : Car)
+	{
+		this.percepts = percepts
+		this.body = body
+	}
+}

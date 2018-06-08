@@ -1,0 +1,10 @@
+/** 
+ * Evènement déclenché par un agent ayant atteint son objectif
+ */
+package events
+
+/** 
+ * @author Nicolas
+ * 
+ */
+event TargetReached
