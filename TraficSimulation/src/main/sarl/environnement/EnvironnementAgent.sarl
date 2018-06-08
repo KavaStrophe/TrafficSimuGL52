@@ -4,7 +4,7 @@
 package environnement
 
 import ^agent.Conducteur
-import configurationWindow.ConfRenderer
+//import configurationWindow.ConfRenderer
 import events.BeginLoop
 import events.EndLoop
 import events.NeedInfluence
