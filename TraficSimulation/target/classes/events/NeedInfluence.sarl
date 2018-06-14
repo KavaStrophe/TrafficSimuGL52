@@ -3,10 +3,9 @@
  */
 package events
 
-import java.util.ArrayList
-import org.arakhne.afc.gis.road.primitive.RoadSegment
-import environnement.Car
 import environnement.AbstractStaticObject
+import environnement.Car
+import java.util.ArrayList
 
 /** 
  * @author Nicolas

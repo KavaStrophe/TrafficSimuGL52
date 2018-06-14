@@ -67,8 +67,7 @@ public class RoadRenderer extends Application {
 	}
 
 	@Override
-	@SuppressWarnings({"checkstyle:magicnumber", "checkstyle:regexp", "checkstyle:npathcomplexity",
-		"checkstyle:nestedifdepth", "rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void start(Stage primaryStage) {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);

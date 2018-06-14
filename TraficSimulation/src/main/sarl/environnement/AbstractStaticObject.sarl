@@ -5,8 +5,8 @@ package environnement
 
 import java.util.UUID
 import org.arakhne.afc.gis.road.primitive.RoadConnection
-import org.arakhne.afc.math.geometry.d1.d.Point1d
 import org.arakhne.afc.gis.road.primitive.RoadSegment
+import org.arakhne.afc.math.geometry.d2.d.Point2d
 
 /** 
  * @author Nicolas
@@ -45,7 +45,7 @@ abstract class AbstractStaticObject {
 	}
 	def getPosition : float
 	{
-		return this.position
+		return this.position 
 	}
 	def setPosition(position : float)
 	{
@@ -70,5 +70,9 @@ abstract class AbstractStaticObject {
 
 	def getEntryPoint() : RoadConnection {
 		return this.entryPoint
+	}
+	def getPosition2d() : Point2d
+	{
+		return this.segment.getGeoLocationForDistance(this.position)
 	}
 }

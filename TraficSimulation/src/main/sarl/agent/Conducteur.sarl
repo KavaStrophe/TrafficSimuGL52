@@ -3,28 +3,20 @@
  */
 package ^agent
 
-import io.sarl.core.AgentKilled
-import io.sarl.core.AgentSpawned
-import io.sarl.core.ContextJoined
-import io.sarl.core.ContextLeft
-import io.sarl.core.Destroy
-import io.sarl.core.Initialize
-import io.sarl.core.Logging
-import io.sarl.core.MemberJoined
-import io.sarl.core.MemberLeft
-import java.util.UUID
-import environnement.Car
-import io.sarl.core.Lifecycle
-import java.util.ArrayList
-import events.NeedInfluence
-import environnement.InfluenceAgent
-import io.sarl.core.DefaultContextInteractions
-import events.SendedInfluence
-import org.arakhne.afc.gis.road.primitive.RoadSegment
 import environnement.AbstractStaticObject
+import environnement.Car
+import environnement.InfluenceAgent
 import events.GPSPath
 import events.GPSPathReturn
-import org.arakhne.afc.gis.road.path.RoadPath
+import events.NeedInfluence
+import events.SendedInfluence
+import io.sarl.core.DefaultContextInteractions
+import io.sarl.core.Destroy
+import io.sarl.core.Initialize
+import io.sarl.core.Lifecycle
+import io.sarl.core.Logging
+import java.util.ArrayList
+import org.arakhne.afc.gis.road.primitive.RoadSegment
 
 /** 
  * @author Nicolas

@@ -13,8 +13,6 @@ import org.arakhne.afc.gis.mapelement.MapElement;
 import org.arakhne.afc.gis.maplayer.MapElementLayer;
 import org.arakhne.afc.gis.maplayer.TreeMapElementLayer;
 import org.arakhne.afc.gis.road.RoadPolyline;
-import org.arakhne.afc.gis.road.StandardRoadNetwork;
-import org.arakhne.afc.gis.road.layer.RoadNetworkLayer;
 import org.arakhne.afc.gis.road.primitive.RoadNetworkException;
 import org.arakhne.afc.io.dbase.DBaseFileFilter;
 import org.arakhne.afc.io.shape.ESRIBounds;

@@ -4,9 +4,11 @@
 package environnement
 
 import ^agent.Conducteur
-import configurationWindow.ConfRenderer
+import configurationWindow.CarModel
 import events.BeginLoop
 import events.EndLoop
+import events.GPSPath
+import events.GPSPathReturn
 import events.NeedInfluence
 import events.SendedInfluence
 import events.TargetReached
@@ -14,60 +16,43 @@ import io.sarl.core.Behaviors
 import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Destroy
 import io.sarl.core.Initialize
-import io.sarl.core.Logging
 import io.sarl.util.IdentifierScope
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.UUID
-import org.arakhne.afc.gis.road.StandardRoadNetwork
-import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
-import org.arakhne.afc.math.geometry.d1.d.Point1d
-import traficWindow.RoadRenderer
-import utils.Loader
-
-import static traficWindow.RoadRenderer.*
-import org.arakhne.afc.gis.road.primitive.RoadConnection
-import org.arakhne.afc.gis.road.primitive.RoadSegment
-import configurationWindow.CarModel
-import events.GPSPath
-import events.GPSPathReturn
 import org.arakhne.afc.gis.road.path.RoadPath
 import org.arakhne.afc.gis.road.path.astar.RoadAStar
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import utils.Loader
 import utils.PersonalizedRoadNetwork
-import javafx.scene.paint.Color
-import org.arakhne.afc.math.geometry.d2.d.Point2d
 
 /** 
  * @author Nicolas
  * 
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 agent Simulation {
 	uses DefaultContextInteractions
-	uses Logging
 	uses Behaviors
 	
-	var roadNetwork : PersonalizedRoadNetwork
+	var  roadNetwork : PersonalizedRoadNetwork
 	var agents : ArrayList<UUID> = new ArrayList<UUID>
 	var agentBodies : HashMap<UUID, Car> = new HashMap<UUID, Car> 
 	var influences : HashMap<UUID, InfluenceAgent> = new HashMap<UUID, InfluenceAgent>
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
-	var timespace : int
+	var timespace : int = 150
 	
-	on Initialize {
-		this.timespace = 150
+	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		this.roadNetwork.analizeNetwork
-		System.out.println(this.roadNetwork.impasses)
 		
 		//RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		//RoadRenderer.render()
 		//ConfRenderer.render()
 		
-		var newModel = new CarModel(10, 10, 10, 10, new Color(1, 1, 1, 0.1), "test", 150)
-		addAgentToTheSimulation(newModel) 
-		System.out.println("Agent : " + agents)
 		//wake(new BeginLoop)
 	} 
 	
@@ -109,13 +94,6 @@ agent Simulation {
 		emit(new GPSPathReturn(roads), new IdentifierScope(occurrence.source.UUID))
 	}
 	
-	def get2dPositionOfTheCar(car : Car) : Point2d{
-		return car.segment.getGeoLocationForDistance(car.position)
-	}
-	def get2dPositionOfPanels() {
-	}
-	def get2dPositionOfLights() {
-	}
 	def chooseModelForNewAgent() : CarModel{
 		var newModel : CarModel
 		for (modelName : desiredNbModel.keySet)
@@ -194,6 +172,7 @@ agent Simulation {
 		return exploreSegments(body.entryPoint, body.segment, viewDistance, position)
 	}
 	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float) : ArrayList<AbstractStaticObject>{
+
 		var restDisView : float
 		var newPos : float = position
 		var percepts = new ArrayList<AbstractStaticObject>

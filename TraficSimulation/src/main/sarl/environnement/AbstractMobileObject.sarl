@@ -3,12 +3,9 @@
  */
 package environnement
 
-import org.arakhne.afc.gis.road.primitive.RoadSegment
-import java.util.ArrayList
 import java.util.UUID
-import org.arakhne.afc.math.geometry.d1.d.Point1d
-import org.arakhne.afc.gis.road.primitive.RoadConnection
 import org.arakhne.afc.gis.road.path.RoadPath
+import org.arakhne.afc.gis.road.primitive.RoadConnection
 
 /** 
  * @author Nicolas

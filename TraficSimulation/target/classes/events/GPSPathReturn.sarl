@@ -3,8 +3,6 @@
  */
 package events
 
-import java.util.ArrayList
-import org.arakhne.afc.gis.road.primitive.RoadSegment
 import org.arakhne.afc.gis.road.path.RoadPath
 
 /** 

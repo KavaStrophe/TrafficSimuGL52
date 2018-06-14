@@ -3,10 +3,8 @@
  */
 package environnement
 
-import org.arakhne.afc.gis.road.primitive.RoadSegment
-import java.util.List
-import org.arakhne.afc.gis.road.path.RoadPath
 import java.util.ArrayList
+import org.arakhne.afc.gis.road.primitive.RoadSegment
 
 /** 
  * @author Nicolas

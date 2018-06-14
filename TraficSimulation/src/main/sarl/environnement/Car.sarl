@@ -6,15 +6,13 @@ package environnement
 import configurationWindow.CarModel
 import java.util.UUID
 import javafx.scene.paint.Color
-import java.util.ArrayList
-import org.arakhne.afc.math.geometry.d1.d.Point1d
 import org.arakhne.afc.gis.road.primitive.RoadConnection
 
 /**  
  * @author Nicolas
  * 
  */
-class Car extends AbstractMobileObject{ 
+class Car extends AbstractMobileObject{  
 	var model : CarModel
 	var color : Color    
 	
