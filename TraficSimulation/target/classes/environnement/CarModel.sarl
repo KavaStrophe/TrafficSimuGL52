@@ -1,7 +1,7 @@
 /** 
  * Modèle indiquant les propriétés génériques que doivent posséder les Cars l'employant
  */
-package configurationWindow
+package environnement
 
 import javafx.scene.paint.Color
 
@@ -15,7 +15,6 @@ class CarModel {
 	var maxLinearAcceleration : float
 	var maxLinearDesceleration : float
 	var color : Color
-	var maxCountOfModel : int
 	var name : String
 	var viewDistance : float
 	

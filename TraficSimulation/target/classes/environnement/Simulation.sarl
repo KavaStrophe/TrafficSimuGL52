@@ -4,7 +4,7 @@
 package environnement
 
 import ^agent.Conducteur
-import configurationWindow.CarModel
+import environnement.CarModel
 import events.BeginLoop
 import events.EndLoop
 import events.GPSPath
@@ -47,7 +47,6 @@ agent Simulation {
 	
 	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
-		this.roadNetwork.analizeNetwork
 		
 		//RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		//RoadRenderer.render()
@@ -112,10 +111,10 @@ agent Simulation {
 	def removeModel(name : String){
 		this.definedModels.remove(name)
 	}
-	def addAgentToTheSimulation(model : CarModel){
+	def addAgentToTheSimulation(model : CarModel, idSpawneur : int){
 		var id = spawn(Conducteur)
-		var numSpawner = Math.floor(Math.random() * this.roadNetwork.impasses.size()).intValue
-		var point = this.roadNetwork.impasses.get(numSpawner)
+		//var numSpawner = Math.floor(Math.random() * this.roadNetwork.impasses.size()).intValue
+		var point = this.roadNetwork.impasses.get(idSpawneur)
 		var segment = point.getConnectedSegment(0)
 		var car = new Car(UUID.randomUUID, point, model)
 		this.agents.add(id)
@@ -142,17 +141,13 @@ agent Simulation {
 		else
 			this.actualNbModel.put(model.name, 1)
 	}
-	def removeCarFromHisSegment(car : Car)
-	{
-		var segment = car.segment
-
-		segment.addUserData("CAR", new ArrayList(segment.getUserData("CAR")).remove(car))
+	def removeCarFromHisSegment(car : Car){
+		car.segment.addUserData("CAR", new ArrayList(car.segment.getUserData("CAR")).remove(car)) 
 	}
 	def addCarToThisSegment(car : Car, segment : RoadSegment){
 		segment.addUserData("CAR", new ArrayList(segment.getUserData("CAR")).add(car))
 	}
-	def moveCarToSegment(car : Car, segment : RoadSegment)
-	{
+	def moveCarToSegment(car : Car, segment : RoadSegment){
 		removeCarFromHisSegment(car)
 		addCarToThisSegment(car, segment)
 	}
@@ -248,6 +243,7 @@ agent Simulation {
 		var acceleration = influence.acceleration
 		var actuSpeed = car.speed
 		var newVitesse = (acceleration * this.timespace) + actuSpeed
+		removeCarFromHisSegment(car)
 		move(car, newVitesse, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
@@ -268,6 +264,17 @@ agent Simulation {
 		}
 		if(distanceRest < distance)
 		{
+			if (endPoint.getConnectedSegmentCount == 1)
+			{
+				var idAgent : UUID
+				
+				for (id :  this.agentBodies.keySet())
+					{
+						if (this.agentBodies.get(id) == car)
+						idAgent = id
+				}
+				removeAgentFromTheSimulation(idAgent)
+			}
 			var nextRoad = roads.get(0)
 			roads.remove(0)
 			car.entryPoint = endPoint
@@ -281,6 +288,7 @@ agent Simulation {
 		else
 		{
 			car.position = car.position + distance
+			addCarToThisSegment(car, car.segment)
 		}
 	}
 }

@@ -3,9 +3,10 @@
  */
 package environnement
 
+import java.util.ArrayList
 import java.util.UUID
-import org.arakhne.afc.gis.road.path.RoadPath
 import org.arakhne.afc.gis.road.primitive.RoadConnection
+import org.arakhne.afc.gis.road.primitive.RoadSegment
 
 /** 
  * @author Nicolas
@@ -15,7 +16,7 @@ abstract class AbstractMobileObject extends AbstractStaticObject {
 	var maxLinearSpeed : float
 	var maxLinearAcceleration : float
 	var maxLinearDesceleration : float 
-	var targets : RoadPath
+	var targets : ArrayList<RoadSegment>
 	
 	var currentLinearSpeed : float = 0 
 	
@@ -25,14 +26,26 @@ abstract class AbstractMobileObject extends AbstractStaticObject {
 		this.maxLinearSpeed = maxSpeed
 		this.maxLinearAcceleration = maxAcc
 		this.maxLinearDesceleration = minAcc 
-		this.targets = new RoadPath()
+		this.targets = new ArrayList()
 	}
 	
 	def getSpeed : float
 	{
 		return this.currentLinearSpeed
 	}
-	
+	def targets : ArrayList<RoadSegment> {
+		return this.targets
+	}
+	def getMaxSpeed : float
+	{
+		return this.maxLinearSpeed
+	}
+	def getMaxDesc : float {
+		return this.maxLinearDesceleration
+	} 
+	def getMaxAcc : float {
+		return this.maxLinearAcceleration
+	}
 	def setMaxSpeed(maxSpeed : float)
 	{
 		this.maxLinearSpeed = maxSpeed

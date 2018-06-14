@@ -3,7 +3,7 @@
  */
 package environnement
 
-import configurationWindow.CarModel
+import environnement.CarModel
 import java.util.UUID
 import javafx.scene.paint.Color
 import org.arakhne.afc.gis.road.primitive.RoadConnection
@@ -51,6 +51,10 @@ class Car extends AbstractMobileObject{
 
 	def getModel : CarModel {
 		return this.model
+	}
+
+	def getColor : Color {
+		return this.color
 	}
 	
 }

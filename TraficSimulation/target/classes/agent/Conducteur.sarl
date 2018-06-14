@@ -28,7 +28,6 @@ agent Conducteur {
 	uses DefaultContextInteractions
 	
 	var percepts : ArrayList<AbstractStaticObject>
-	var influence : InfluenceAgent
 	var seeking = new BehaviorSeeking()
 	var following = new BehaviorFollowing()
 	var body : Car

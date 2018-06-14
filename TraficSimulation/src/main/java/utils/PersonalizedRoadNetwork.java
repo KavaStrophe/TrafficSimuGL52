@@ -15,6 +15,7 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 
 	public PersonalizedRoadNetwork(Rectangle2afp<?, ?, ?, ?, ?, ?> originalBounds) {
 		super(originalBounds);
+		this.analizeNetwork();
 	}
 
 	public ArrayList<RoadConnection> getImpasses()
@@ -32,7 +33,7 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 		return this.fourRoadConnections;
 	}
 	
-	public void analizeNetwork()
+	private void analizeNetwork()
 	{
 		Collection<RoadSegment> allSegments = (Collection<RoadSegment>) this.getRoadSegments();
 		for (RoadSegment segment : allSegments) {

@@ -30,6 +30,11 @@ abstract class AbstractStaticObject {
 			this.position = this.segment.getLength.floatValue
 		this.length = length
 	}
+
+	new (id : UUID, point : RoadConnection, position : float, lenght : float) {  
+		this(id, point, lenght)
+		this.position = position
+	}
 	
 	def onSameRoad(object : AbstractStaticObject) : Boolean
 	{
