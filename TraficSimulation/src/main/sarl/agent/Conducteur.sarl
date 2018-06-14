@@ -16,7 +16,6 @@ import java.util.UUID
 import environnement.Car
 import io.sarl.core.Lifecycle
 import java.util.ArrayList
-import environnement.Percept
 import events.NeedInfluence
 import environnement.InfluenceAgent
 import io.sarl.core.DefaultContextInteractions
@@ -36,12 +35,12 @@ agent Conducteur {
 	uses Lifecycle
 	uses DefaultContextInteractions
 	
-	var percepts : ArrayList<RoadSegment>
+	var percepts : ArrayList<AbstractStaticObject>
 	var influence : InfluenceAgent
 	var seeking = new BehaviorSeeking()
 	var following = new BehaviorFollowing()
 	var body : Car
-	var gpsPath : RoadPath = null
+	var gpsPath : ArrayList<RoadSegment> = null
 	
 	var maxSpeed : float
 	
@@ -54,7 +53,7 @@ agent Conducteur {
 	}
 	
 	on GPSPathReturn{
-		this.gpsPath = occurrence.gpsPath
+		this.gpsPath = new ArrayList(occurrence.gpsPath.toArray)
 	}
 	
 	/* Reçu à la fin du traitement des perceptions par l'environnement */
@@ -67,7 +66,8 @@ agent Conducteur {
 	def computeInfluence()
 	{
 		var acc : float
-		var obj = NextObjectOnPath(percepts)
+		var selectedPath = this.gpsPath
+		/*var obj = NextObjectOnPath(percepts)
 		computeMaxSpeed(percepts)
 		if(this.gpsPath == null)
 		{ 
@@ -79,15 +79,17 @@ agent Conducteur {
 			acc = this.following.run(this.body, distance, this.maxSpeed)
 		}
 		else
-			acc = this.seeking.run(this.body, this.maxSpeed)
-		emit(new SendedInfluence(new InfluenceAgent(this.gpsPath, acc)))
+		 */
+		this.maxSpeed = 50
+		acc = this.seeking.run(this.body, this.maxSpeed)
+		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
 	
 	def computeDistanceBefore(object : AbstractStaticObject) : float {
 		var distance : float
 		return distance
 	}
-	def NextObjectOnPath(roads : ArrayList<RoadSegment>) : AbstractStaticObject
+	def NextObjectOnPath(roads : ArrayList<RoadSegment>) : AbstractStaticObject 
 	{
 		
 	}

@@ -14,7 +14,7 @@ import org.arakhne.afc.gis.road.primitive.RoadConnection
  * @author Nicolas
  * 
  */
-class Car extends AbstractMobileObject{
+class Car extends AbstractMobileObject{ 
 	var model : CarModel
 	var color : Color    
 	
@@ -49,6 +49,10 @@ class Car extends AbstractMobileObject{
 
 	def getMinAcc : float {
 		return this.model.minAcc
+	}
+
+	def getModel : CarModel {
+		return this.model
 	}
 	
 }

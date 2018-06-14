@@ -1,0 +1,241 @@
+/** 
+ * Agent d'environnement à lancer pour démarrer la simulation
+ */
+package environnement
+
+import ^agent.Conducteur
+import configurationWindow.ConfRenderer
+import events.BeginLoop
+import events.EndLoop
+import events.NeedInfluence
+import events.SendedInfluence
+import events.TargetReached
+import io.sarl.core.Behaviors
+import io.sarl.core.DefaultContextInteractions
+import io.sarl.core.Destroy
+import io.sarl.core.Initialize
+import io.sarl.core.Logging
+import io.sarl.util.IdentifierScope
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.UUID
+import org.arakhne.afc.gis.road.StandardRoadNetwork
+import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
+import org.arakhne.afc.math.geometry.d1.d.Point1d
+import traficWindow.RoadRenderer
+import utils.Loader
+
+import static traficWindow.RoadRenderer.*
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import configurationWindow.CarModel
+import events.GPSPath
+import events.GPSPathReturn
+import org.arakhne.afc.gis.road.path.RoadPath
+import org.arakhne.afc.gis.road.path.astar.RoadAStar
+import utils.PersonalizedRoadNetwork
+import javafx.scene.paint.Color
+
+/** 
+ * @author Nicolas
+ * 
+ */
+agent Simulation {
+	uses DefaultContextInteractions
+	uses Logging
+	uses Behaviors
+	
+	var roadNetwork : PersonalizedRoadNetwork
+	var agents : ArrayList<UUID> = new ArrayList<UUID>
+	var agentBodies : HashMap<UUID, Car> = new HashMap<UUID, Car> 
+	var influences : HashMap<UUID, InfluenceAgent> = new HashMap<UUID, InfluenceAgent>
+	var desiredNbModel : HashMap<String, Integer> = new HashMap()
+	var actualNbModel : HashMap<String, Integer> = new HashMap()
+	var definedModels : HashMap<String, CarModel> = new HashMap()
+	
+	on Initialize {
+		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
+		this.roadNetwork.analizeNetwork
+		System.out.println(this.roadNetwork.impasses)
+		
+		//RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
+		//RoadRenderer.render()
+		//ConfRenderer.render()
+		
+		var newModel = new CarModel(10, 10, 10, 10, new Color(1, 1, 1, 0.1), "test", 150)
+		addAgent(newModel)
+		System.out.println("Agent : " + agents)
+		//wake(new BeginLoop)
+	}
+	
+	on BeginLoop{
+		this.influences = new HashMap<UUID, InfluenceAgent>()
+		computePerceptions()
+	}
+	on EndLoop{
+		consumeInfluence()
+		Thread.sleep(150)
+		wake(new BeginLoop)
+	}
+	
+	on SendedInfluence
+	{
+		this.influences.put(occurrence.source.UUID, occurrence.influence)
+		if(this.influences.size() == this.agentBodies.size())
+		{
+			wake(new EndLoop)
+		}
+	}
+	
+	on TargetReached
+	{
+		var id = occurrence.source.UUID
+		removeAgent(id)
+	}
+	
+	on GPSPath
+	{
+		var roads : RoadPath = null
+		if (this.agentBodies.get(occurrence.getSource.UUID) != null)
+		{
+			var entryPoint = this.agentBodies.get(occurrence.getSource.UUID).entryPoint
+			var finalPoint : RoadConnection 
+			do
+			{
+				finalPoint = this.roadNetwork.impasses.get(Math.round(Math.random() * this.roadNetwork.impasses.size()).intValue - 1)
+			}
+			while (finalPoint == entryPoint)
+
+			var aStar = new RoadAStar()
+			roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
+		}
+		emit(new GPSPathReturn(roads), new IdentifierScope(occurrence.source.UUID))
+	}
+	
+	def addModel(model : CarModel)
+	{
+		this.definedModels.put(model.name, model)
+	}
+	def removeModel(name : String)
+	{
+		this.definedModels.remove(name)
+	}
+	def addAgent(model : CarModel){
+		var id = spawn(Conducteur)
+		var numSpawner = Math.floor(Math.random() * this.roadNetwork.impasses.size()).intValue
+		var car = new Car(UUID.randomUUID, this.roadNetwork.impasses.get(numSpawner), model)
+		this.agents.add(id)
+		this.agentBodies.put(id, car)
+		if (this.actualNbModel.containsKey(model.name))
+			this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) + 1)
+		else
+			this.actualNbModel.put(model.name, 1)
+	}
+	def removeAgent(id : UUID){
+		this.agentBodies.remove(id)
+		this.agents.remove(id)
+		emit(new Destroy(), new IdentifierScope(id))
+
+		var car = this.agentBodies.get(id)
+		this.agentBodies.remove(id)
+		var model = car.model
+		if (this.actualNbModel.containsKey(model.name))
+			this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) + 1)
+		else
+			this.actualNbModel.put(model.name, 1)
+	}
+	
+	def computePerceptions(){
+		for(id : this.agents)
+		{
+			if (this.agentBodies.containsKey(id)){
+				var agentBody = this.agentBodies.get(id)
+				var percepts = computePerceptionsFor(agentBody)
+				emit(new NeedInfluence(percepts, agentBody), new IdentifierScope(id))
+			}
+		}
+	}
+	
+	def computePerceptionsFor(body : Car) : ArrayList<AbstractStaticObject> 
+	{
+		var position = body.position
+		var viewDistance = body.model.viewDistance
+		return exploreSegments(body.entryPoint, body.segment, viewDistance, position)
+	}
+	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment,
+		distance : float, position : float) : ArrayList<AbstractStaticObject>
+	{
+		var restDisView : float
+		var newPos : float = position
+		var percepts = new ArrayList<AbstractStaticObject>
+		if (entryPoint == segment.beginPoint) {
+			if (newPos == -1)
+				newPos = 0
+			restDisView = distance - segment.getDistanceToEnd(newPos).floatValue
+
+		} else {
+			if (newPos == -1)
+				newPos = segment.getDistanceToEnd(0).floatValue
+			restDisView = distance - segment.getDistanceFromStart(newPos).floatValue
+
+		}
+
+		var tempsPercepts = new ArrayList<AbstractStaticObject>
+		var unClassedPercepts = new ArrayList<AbstractStaticObject>
+		if (segment.hasUserData("SIGNS"))
+			unClassedPercepts.addAll(segment.getUserData("SIGNS"))
+		if (segment.hasUserData("CARS"))
+			unClassedPercepts.addAll(segment.getUserData("CARS"))
+		
+		for (percept : unClassedPercepts)
+		{
+			if (percept.entryPoint == entryPoint)
+				tempsPercepts.add(percept)
+		}
+		
+		if (restDisView < 0)
+		{
+			if(entryPoint == segment.beginPoint)
+			{
+				for (obj : tempsPercepts) {
+					if (segment.getDistanceFromStart(obj.position) <= distance)
+						tempsPercepts.add(obj)
+				}
+			}
+			else
+			{
+				for (obj : tempsPercepts) {
+					if (segment.getDistanceToEnd(obj.position) <= distance)
+						tempsPercepts.add(obj)
+				}
+			}
+			return percepts
+		}
+		else
+		{
+			var nextPoint : RoadConnection
+			
+			if (entryPoint == segment.beginPoint)
+				nextPoint = segment.endPoint
+			else
+				nextPoint = segment.beginPoint
+				
+			percepts.addAll(tempsPercepts)
+			for (newSegment : nextPoint.connectedSegments) {
+				percepts.addAll(exploreSegments(nextPoint, newSegment, restDisView, -1))
+			}
+			return percepts
+		}
+	}
+	def consumeInfluence()
+	{
+		for (conduc : this.agents) {
+			if (this.agentBodies.containsKey(conduc)) {
+				consumeInfluenceFor(agentBodies.get(conduc), influences.get(conduc))
+			}
+		}
+	}
+	def consumeInfluenceFor(car : Car, ^agent : InfluenceAgent) {
+		
+	}
+}

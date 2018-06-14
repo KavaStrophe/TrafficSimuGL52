@@ -4,9 +4,9 @@
 package events
 
 import java.util.ArrayList
-import environnement.Percept
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import environnement.Car
+import environnement.AbstractStaticObject
 
 /** 
  * @author Nicolas
@@ -14,10 +14,10 @@ import environnement.Car
  */
 event NeedInfluence
 {
-	var percepts : ArrayList<RoadSegment>
-	var body : Car
+	var percepts : ArrayList<AbstractStaticObject>
+	var body : Car 
 	
-	new(percepts : ArrayList<RoadSegment>, body : Car)
+	new(percepts : ArrayList<AbstractStaticObject>, body : Car)
 	{
 		this.percepts = percepts
 		this.body = body

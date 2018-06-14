@@ -16,14 +16,18 @@ class CarModel {
 	var maxLinearDesceleration : float
 	var color : Color
 	var maxCountOfModel : int
+	var name : String
+	var viewDistance : float
 	
-	new(length : float, maxSpeed : float, maxAcc : float, color : Color, maxNb : int)
+	new(length : float, maxSpeed : float, maxAcc : float, maxDesc : float, color : Color, name : String, viewDistance : float)
 	{
 		this.length = length
 		this.maxLinearSpeed = maxSpeed
 		this.maxLinearAcceleration = maxAcc
+		this.maxLinearDesceleration = maxDesc
+		this.viewDistance = viewDistance
 		this.color = color
-		this.maxCountOfModel = maxNb
+		this.name = name
 	}
 	
 	def getLength : float
@@ -42,12 +46,15 @@ class CarModel {
 	{
 		return this.color
 	}
-	def getMaxModel
+	def getName
 	{
-		return this.maxCountOfModel
+		return this.name
 	}
 	def getMinAcc : float {
 		return this.maxLinearDesceleration
+	}
+	def getViewDistance : float {
+		return this.viewDistance
 	}
 	
 }

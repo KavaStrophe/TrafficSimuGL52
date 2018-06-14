@@ -6,6 +6,7 @@ package environnement
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import java.util.List
 import org.arakhne.afc.gis.road.path.RoadPath
+import java.util.ArrayList
 
 /** 
  * @author Nicolas
@@ -13,9 +14,9 @@ import org.arakhne.afc.gis.road.path.RoadPath
  */
 class InfluenceAgent { 
 	var acceleration : float
-	var roads : RoadPath
+	var roads : ArrayList<RoadSegment>
 	
-	new(roads : RoadPath, acceleration : float)
+	new(roads : ArrayList<RoadSegment>, acceleration : float)
 	{
 		this.acceleration = acceleration
 		this.roads = roads

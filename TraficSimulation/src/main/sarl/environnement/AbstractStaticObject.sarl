@@ -31,7 +31,7 @@ abstract class AbstractStaticObject {
 		this.length = length
 	}
 	
-	def onSameSegment(object : AbstractStaticObject) : Boolean
+	def onSameRoad(object : AbstractStaticObject) : Boolean
 	{
 		if (this.segment === object.segment &&
 		this.entryPoint === object.entryPoint)

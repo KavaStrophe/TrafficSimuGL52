@@ -25,7 +25,7 @@ import org.arakhne.afc.vmutil.FileSystem;
 import traficWindow.RoadRenderer;
 
 public class Loader {
-	public static StandardRoadNetwork loadShapeFile(String fileDesc) {
+	public static PersonalizedRoadNetwork loadShapeFile(String fileDesc) {
 		File file;
 		
 		try {
@@ -35,7 +35,7 @@ public class Loader {
 		} 
 		
 		try {
-			StandardRoadNetwork network = null;
+			PersonalizedRoadNetwork network = null;
 			MapElementLayer<MapElement> layer = null;
 
 			final File dbfFile = FileSystem.replaceExtension(file, DBaseFileFilter.EXTENSION_DBASE_FILE);
@@ -66,7 +66,7 @@ public class Loader {
 					while ((element = reader.read()) != null) {
 						if (element instanceof RoadPolyline) {
 							if (network == null) {
-								network = new StandardRoadNetwork(worldRect);
+								network = new PersonalizedRoadNetwork(worldRect);
 							}
 							final RoadPolyline sgmt = (RoadPolyline) element;
 							try {

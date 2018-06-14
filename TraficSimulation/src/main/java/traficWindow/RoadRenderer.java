@@ -61,8 +61,9 @@ public class RoadRenderer extends Application {
 	public static MapElementLayer<?> roadLayer;
 	public static MapElementLayer<?> carLayer;
 
-	public static void render() {
+	public static boolean render() {
 		launch();
+		return true;
 	}
 
 	@Override
