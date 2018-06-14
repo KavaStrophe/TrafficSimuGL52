@@ -40,11 +40,11 @@ abstract class AbstractMobileObject extends AbstractStaticObject {
 	{
 		this.maxLinearSpeed = maxSpeed
 	} 
-	def setMaxAcc(maxAcc : float) 
+	def setMaxAcc(maxAcc : float)  
 	{
 		this.maxLinearAcceleration = maxAcc
 	}
-	def setCurrSpeed(speed : float) {
+	def setSpeed(speed : float) {
 		this.currentLinearSpeed = speed
 	}
 }

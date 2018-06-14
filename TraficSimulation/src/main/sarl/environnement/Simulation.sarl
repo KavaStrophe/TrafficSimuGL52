@@ -35,6 +35,7 @@ import org.arakhne.afc.gis.road.path.RoadPath
 import org.arakhne.afc.gis.road.path.astar.RoadAStar
 import utils.PersonalizedRoadNetwork
 import javafx.scene.paint.Color
+import org.arakhne.afc.math.geometry.d2.d.Point2d
 
 /** 
  * @author Nicolas
@@ -52,8 +53,10 @@ agent Simulation {
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
+	var timespace : int
 	
 	on Initialize {
+		this.timespace = 150
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		this.roadNetwork.analizeNetwork
 		System.out.println(this.roadNetwork.impasses)
@@ -63,10 +66,10 @@ agent Simulation {
 		//ConfRenderer.render()
 		
 		var newModel = new CarModel(10, 10, 10, 10, new Color(1, 1, 1, 0.1), "test", 150)
-		addAgent(newModel)
+		addAgentToTheSimulation(newModel) 
 		System.out.println("Agent : " + agents)
 		//wake(new BeginLoop)
-	}
+	} 
 	
 	on BeginLoop{
 		this.influences = new HashMap<UUID, InfluenceAgent>()
@@ -74,27 +77,21 @@ agent Simulation {
 	}
 	on EndLoop{
 		consumeInfluence()
-		Thread.sleep(150)
+		Thread.sleep(this.timespace)
 		wake(new BeginLoop)
 	}
-	
-	on SendedInfluence
-	{
+	on SendedInfluence{
 		this.influences.put(occurrence.source.UUID, occurrence.influence)
 		if(this.influences.size() == this.agentBodies.size())
 		{
 			wake(new EndLoop)
 		}
 	}
-	
-	on TargetReached
-	{
+	on TargetReached{
 		var id = occurrence.source.UUID
-		removeAgent(id)
+		removeAgentFromTheSimulation(id)
 	}
-	
-	on GPSPath
-	{
+	on GPSPath{
 		var roads : RoadPath = null
 		if (this.agentBodies.get(occurrence.getSource.UUID) != null)
 		{
@@ -112,31 +109,54 @@ agent Simulation {
 		emit(new GPSPathReturn(roads), new IdentifierScope(occurrence.source.UUID))
 	}
 	
-	def addModel(model : CarModel)
-	{
+	def get2dPositionOfTheCar(car : Car) : Point2d{
+		return car.segment.getGeoLocationForDistance(car.position)
+	}
+	def get2dPositionOfPanels() {
+	}
+	def get2dPositionOfLights() {
+	}
+	def chooseModelForNewAgent() : CarModel{
+		var newModel : CarModel
+		for (modelName : desiredNbModel.keySet)
+		{
+			var nbDesired = desiredNbModel.get(modelName)
+			var nbActual = actualNbModel.get(modelName)
+			
+			if(nbDesired > nbActual)
+				return newModel
+		}
+		return null
+	}
+	def addModel(model : CarModel){
 		this.definedModels.put(model.name, model)
 	}
-	def removeModel(name : String)
-	{
+	def removeModel(name : String){
 		this.definedModels.remove(name)
 	}
-	def addAgent(model : CarModel){
+	def addAgentToTheSimulation(model : CarModel){
 		var id = spawn(Conducteur)
 		var numSpawner = Math.floor(Math.random() * this.roadNetwork.impasses.size()).intValue
-		var car = new Car(UUID.randomUUID, this.roadNetwork.impasses.get(numSpawner), model)
+		var point = this.roadNetwork.impasses.get(numSpawner)
+		var segment = point.getConnectedSegment(0)
+		var car = new Car(UUID.randomUUID, point, model)
 		this.agents.add(id)
 		this.agentBodies.put(id, car)
 		if (this.actualNbModel.containsKey(model.name))
 			this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) + 1)
 		else
 			this.actualNbModel.put(model.name, 1)
+
+		addCarToThisSegment(car, segment)
 	}
-	def removeAgent(id : UUID){
+	def removeAgentFromTheSimulation(id : UUID){
+		var car = this.agentBodies.get(id)
+		removeCarFromHisSegment(car)
+		
 		this.agentBodies.remove(id)
 		this.agents.remove(id)
 		emit(new Destroy(), new IdentifierScope(id))
 
-		var car = this.agentBodies.get(id)
 		this.agentBodies.remove(id)
 		var model = car.model
 		if (this.actualNbModel.containsKey(model.name))
@@ -144,7 +164,20 @@ agent Simulation {
 		else
 			this.actualNbModel.put(model.name, 1)
 	}
-	
+	def removeCarFromHisSegment(car : Car)
+	{
+		var segment = car.segment
+
+		segment.addUserData("CAR", new ArrayList(segment.getUserData("CAR")).remove(car))
+	}
+	def addCarToThisSegment(car : Car, segment : RoadSegment){
+		segment.addUserData("CAR", new ArrayList(segment.getUserData("CAR")).add(car))
+	}
+	def moveCarToSegment(car : Car, segment : RoadSegment)
+	{
+		removeCarFromHisSegment(car)
+		addCarToThisSegment(car, segment)
+	}
 	def computePerceptions(){
 		for(id : this.agents)
 		{
@@ -155,16 +188,12 @@ agent Simulation {
 			}
 		}
 	}
-	
-	def computePerceptionsFor(body : Car) : ArrayList<AbstractStaticObject> 
-	{
+	def computePerceptionsFor(body : Car) : ArrayList<AbstractStaticObject> {
 		var position = body.position
 		var viewDistance = body.model.viewDistance
 		return exploreSegments(body.entryPoint, body.segment, viewDistance, position)
 	}
-	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment,
-		distance : float, position : float) : ArrayList<AbstractStaticObject>
-	{
+	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float) : ArrayList<AbstractStaticObject>{
 		var restDisView : float
 		var newPos : float = position
 		var percepts = new ArrayList<AbstractStaticObject>
@@ -235,7 +264,44 @@ agent Simulation {
 			}
 		}
 	}
-	def consumeInfluenceFor(car : Car, ^agent : InfluenceAgent) {
-		
+	def consumeInfluenceFor(car : Car,  influence : InfluenceAgent) {
+		var roads = influence.roads
+		var acceleration = influence.acceleration
+		var actuSpeed = car.speed
+		var newVitesse = (acceleration * this.timespace) + actuSpeed
+		move(car, newVitesse, roads)
+	}
+	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
+		var segment = car.segment
+		var segmentBeginPoint = segment.beginPoint
+		var entryPoint = car.entryPoint
+		var distanceRest : float
+		var endPoint : RoadConnection
+		if (entryPoint == segmentBeginPoint)
+		{
+			distanceRest = segment.getDistanceToEnd(car.position).floatValue
+			endPoint = segment.endPoint
+		}
+		else
+		{
+			distanceRest = segment.getDistanceFromStart(car.position).floatValue
+			endPoint = segment.beginPoint
+		}
+		if(distanceRest < distance)
+		{
+			var nextRoad = roads.get(0)
+			roads.remove(0)
+			car.entryPoint = endPoint
+			if(nextRoad.beginPoint == endPoint)
+				car.position = 0
+			else
+				car.position = nextRoad.length.floatValue
+			
+			move(car, distanceRest, roads)
+		}
+		else
+		{
+			car.position = car.position + distance
+		}
 	}
 }

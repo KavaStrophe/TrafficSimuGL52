@@ -47,7 +47,7 @@ abstract class AbstractStaticObject {
 	{
 		return this.position
 	}
-	def setPosition(position : Point1d)
+	def setPosition(position : float)
 	{
 		this.position = position 
 	}

@@ -21,4 +21,12 @@ class InfluenceAgent {
 		this.acceleration = acceleration
 		this.roads = roads
 	}
+	def getAcceleration
+	{
+		return this.acceleration
+	}
+	def getRoads
+	{
+		return this.roads
+	}
 }
