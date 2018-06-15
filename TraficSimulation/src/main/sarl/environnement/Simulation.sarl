@@ -26,13 +26,16 @@ import org.arakhne.afc.gis.road.primitive.RoadConnection
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import utils.Loader
 import utils.PersonalizedRoadNetwork
+import traficWindow.RoadRenderer
+import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
+import utils.ThreadComputer
 
 /** 
  * @author Nicolas
  * 
  */
 @SuppressWarnings("potential_field_synchronization_problem")
-agent Simulation {
+agent Simulation{
 	uses DefaultContextInteractions
 	uses Behaviors
 	
@@ -44,14 +47,18 @@ agent Simulation {
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
 	var timespace : int = 150
+	var roadRenderer : RoadRenderer
 	
 	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
+		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
+		this.roadRenderer = ThreadComputer.startRoadRenderer()
 		
-		//RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
-		//RoadRenderer.render()
 		//ConfRenderer.render()
-		
+		System.out.println("ok");
+		System.out.println(roadRenderer);
+
+		//roadRenderer.test();
 		//wake(new BeginLoop)
 	} 
 	

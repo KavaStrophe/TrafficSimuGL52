@@ -22,6 +22,8 @@ package traficWindow;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -31,7 +33,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import org.arakhne.afc.gis.mapelement.GISElementContainer;
+import org.arakhne.afc.gis.mapelement.MapCircle;
 import org.arakhne.afc.gis.mapelement.MapElement;
+import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 import org.arakhne.afc.gis.maplayer.GISLayerContainer;
 import org.arakhne.afc.gis.maplayer.MapElementLayer;
 import org.arakhne.afc.gis.maplayer.MapLayer;
@@ -59,19 +63,41 @@ public class RoadRenderer extends Application {
 	private volatile boolean dragging;
 	private volatile MapElement selectedRoad;
 	public static MapElementLayer<?> roadLayer;
-	public static MapElementLayer<?> carLayer;
+	public static MapElementLayer<MapCircle> carLayer = new ArrayMapElementLayer<MapCircle>();
 
-	public static boolean render() {
-		launch();
-		return true;
-	}
+	public static final CountDownLatch latch = new CountDownLatch(1);
+    public static RoadRenderer renderer = null;
+    
+    private Stage stage;
 
+	public static RoadRenderer waitForReturn() { 
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return renderer;
+    }
+	
+	public static void setRoadRenderer(RoadRenderer roadRenderer) {
+		renderer = roadRenderer;
+        latch.countDown();
+    }
+	
+	public RoadRenderer() {
+		setRoadRenderer(this);
+    }
+	
+	public static void main() {
+        Application.launch();
+    }
+	
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public void start(Stage primaryStage) {
+	public void start(Stage primaryStage) throws InterruptedException {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
-		//layer.addMapLayer(this.carLayer);
+		layer.addMapLayer(this.carLayer);
 		
 		final GISContainer container;
 		container = layer;
@@ -197,5 +223,11 @@ public class RoadRenderer extends Application {
 		return null;
 	}
 
-
+	public void test()
+	{
+		MapCircle elm = new MapCircle(30, 30, 20);
+		elm.setColor(0xff0000);
+		this.carLayer.addMapElement(elm);
+		//stage.show();
+	}
 }
