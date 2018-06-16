@@ -1,0 +1,27 @@
+/** 
+ * Tous les panneaux
+ */
+package environnement
+
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import java.util.UUID
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class SpeedPanel extends AbstractPanel{
+	var speed : int
+
+	new (id : UUID, point : RoadConnection, segment : RoadSegment, position : float, speed : int)  
+	{
+		super(id, point, segment, position, 0)
+		this.speed = speed
+	}
+	
+	def getSpeed () : int
+	{
+		return this.speed
+	}
+}

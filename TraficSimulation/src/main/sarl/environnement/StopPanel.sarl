@@ -1,0 +1,20 @@
+/** 
+ * Tous les panneaux
+ */
+package environnement
+
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import java.util.UUID
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class StopPanel extends AbstractPanel{
+
+	new (id : UUID, point : RoadConnection, segment : RoadSegment, position : float)  
+	{
+		super(id, point, segment, position, 0)
+	}
+}

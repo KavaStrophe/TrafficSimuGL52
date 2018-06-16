@@ -29,6 +29,7 @@ import utils.PersonalizedRoadNetwork
 import traficWindow.RoadRenderer
 import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
 import utils.ThreadComputer
+import java.util.Arrays
 
 /** 
  * @author Nicolas
@@ -48,15 +49,24 @@ agent Simulation{
 	var definedModels : HashMap<String, CarModel> = new HashMap()
 	var timespace : int = 150
 	var roadRenderer : RoadRenderer
+	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
 	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
+		generateDefaultPanels()
 		
 		//ConfRenderer.render()
 		System.out.println("ok");
 		System.out.println(roadRenderer);
+
+		for(panel : this.roadNetwork.stopPanel)
+		{
+			var segment = panel.segment
+			//System.out.println(segment)
+			//System.out.println(segment.getUserDataCollection("PANEL"))
+		}
 
 		//roadRenderer.test();
 		//wake(new BeginLoop)
@@ -64,6 +74,7 @@ agent Simulation{
 	
 	on BeginLoop{
 		this.influences = new HashMap<UUID, InfluenceAgent>()
+		lightPanelProcess()
 		computePerceptions()
 	}
 	on EndLoop{
@@ -99,7 +110,75 @@ agent Simulation{
 		}
 		emit(new GPSPathReturn(roads), new IdentifierScope(occurrence.source.UUID))
 	}
-	
+
+	def generateDefaultPanels()
+	{
+		this.roadNetwork.analizeNetwork
+		for (point : this.roadNetwork.threeRoadConnections) {
+			addStopPanelOnThisRoadConnection(point)
+		}
+		for (point : this.roadNetwork.fourRoadConnections) {
+			addLightPanelsOnThisRoadConnection(point)
+		}
+	}
+	def addStopPanelOnThisRoadConnection(point : RoadConnection) {
+		var randomNumSegment = (Math.random() * 2).intValue
+		var segment = point.getConnectedSegment(randomNumSegment)
+		var distance : float
+		if (point == segment.getEndPoint) {
+			distance = (segment.getDistanceToEnd(0) - 10).floatValue
+		} else {
+			distance = 10
+		}
+		addStopPanel(distance, segment, point)
+	}
+	def addLightPanelsOnThisRoadConnection(point : RoadConnection){
+		var lightPoint = new LightRoadConnection(point)
+		var distance : float
+		this.lightRoadConnections.add(lightPoint)
+		for (segment : point.connectedSegments)
+		{
+			if(point == segment.getEndPoint)
+			{
+				distance = (segment.getDistanceToEnd(0) - 10).floatValue
+			}
+			else
+			{
+				distance = 10
+			}
+			lightPoint.addLightPanel(addLightPanel(distance, segment, point, false))
+		}
+	}
+	def lightPanelProcess(){
+		for (lightPoint : this.lightRoadConnections)
+		{
+			lightPoint.incrTimeCycle()
+		}
+	}
+	def addLightPanel(position : float, segment : RoadSegment, entryPoint : RoadConnection, state : boolean)
+	{
+		var id = UUID.randomUUID()
+		var panel = new LightPanel(id, entryPoint, segment, position, state)
+		this.roadNetwork.lightPanel.add(panel)
+		addObjectToThisSegment("PANEL", panel, segment)
+		return panel
+	}
+	def addSpeedPanel(position : float, segment : RoadSegment, entryPoint : RoadConnection, speedLimit : int)
+	{
+		var id = UUID.randomUUID()
+		var panel = new SpeedPanel(id, entryPoint, segment, position, speedLimit)
+		this.roadNetwork.speedPanel.add(panel)
+		addObjectToThisSegment("PANEL", panel, segment)
+		return panel
+	}
+	def addStopPanel(position : float, segment : RoadSegment, entryPoint : RoadConnection)
+	{
+		var id = UUID.randomUUID()
+		var panel = new StopPanel(id, entryPoint, segment, position)
+		this.roadNetwork.stopPanel.add(panel)
+		addObjectToThisSegment("PANEL", panel, segment)
+		return panel
+	}
 	def chooseModelForNewAgent() : CarModel{
 		var newModel : CarModel
 		for (modelName : desiredNbModel.keySet)
@@ -131,15 +210,15 @@ agent Simulation{
 		else
 			this.actualNbModel.put(model.name, 1)
 
-		addCarToThisSegment(car, segment)
+		addObjectToThisSegment("CAR", car, segment)
 	}
 	def removeAgentFromTheSimulation(id : UUID){
 		var car = this.agentBodies.get(id)
-		removeCarFromHisSegment(car)
+		removeObjectFromHisSegment("CAR", car)
 		
 		this.agentBodies.remove(id)
 		this.agents.remove(id)
-		emit(new Destroy(), new IdentifierScope(id))
+		emit(new Destroy(), new IdentifierScope(id)) 
 
 		this.agentBodies.remove(id)
 		var model = car.model
@@ -148,15 +227,23 @@ agent Simulation{
 		else
 			this.actualNbModel.put(model.name, 1)
 	}
-	def removeCarFromHisSegment(car : Car){
-		car.segment.addUserData("CAR", new ArrayList(car.segment.getUserData("CAR")).remove(car)) 
+	def removeObjectFromHisSegment(type : String, obj : AbstractStaticObject) {
+		/*var segment = obj.segment
+		var antUserData = segment.getUserDataCollection(type)
+		var newUserData = new ArrayList()
+		newUserData.addAll(Arrays.asList(antUserData))
+		newUserData.remove(obj)
+	
+			 * segment.addUserData(type, newUserData)
+			 */
+		obj.segment.removeUserData(type, obj)
 	}
-	def addCarToThisSegment(car : Car, segment : RoadSegment){
-		segment.addUserData("CAR", new ArrayList(segment.getUserData("CAR")).add(car))
+	def addObjectToThisSegment(type : String, obj : AbstractStaticObject, segment : RoadSegment){
+		segment.addUserData(type, obj)
 	}
-	def moveCarToSegment(car : Car, segment : RoadSegment){
-		removeCarFromHisSegment(car)
-		addCarToThisSegment(car, segment)
+	def moveCarToSegment(car : Car, segment : RoadSegment) {
+		removeObjectFromHisSegment("CAR", car)
+		addObjectToThisSegment("CAR", car, segment)
 	}
 	def computePerceptions(){
 		for(id : this.agents)
@@ -192,10 +279,10 @@ agent Simulation{
 
 		var tempsPercepts = new ArrayList<AbstractStaticObject>
 		var unClassedPercepts = new ArrayList<AbstractStaticObject>
-		if (segment.hasUserData("SIGNS"))
-			unClassedPercepts.addAll(segment.getUserData("SIGNS"))
-		if (segment.hasUserData("CARS"))
-			unClassedPercepts.addAll(segment.getUserData("CARS"))
+		if (segment.hasUserData("PANEL"))
+			unClassedPercepts.addAll(segment.getUserDataCollection("PANEL"))
+		if (segment.hasUserData("CAR"))
+			unClassedPercepts.addAll(segment.getUserDataCollection("CAR"))
 		
 		for (percept : unClassedPercepts)
 		{
@@ -250,7 +337,7 @@ agent Simulation{
 		var acceleration = influence.acceleration
 		var actuSpeed = car.speed
 		var newVitesse = (acceleration * this.timespace) + actuSpeed
-		removeCarFromHisSegment(car)
+		removeObjectFromHisSegment("CAR", car)
 		move(car, newVitesse, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
@@ -290,12 +377,12 @@ agent Simulation{
 			else
 				car.position = nextRoad.length.floatValue
 			
-			move(car, distanceRest, roads)
+			move(car, (distance - distanceRest), roads)
 		}
 		else
 		{
 			car.position = car.position + distance
-			addCarToThisSegment(car, car.segment)
+			addObjectToThisSegment("CAR", car, car.segment)
 		}
 	}
 }

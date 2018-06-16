@@ -1,0 +1,41 @@
+/** 
+ * Tous les panneaux
+ */
+package environnement
+
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import java.util.UUID
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class LightPanel extends AbstractPanel{
+	var state : boolean
+
+	new (id : UUID, entryPoint : RoadConnection, segment : RoadSegment, position : float)  
+	{
+		super(id, entryPoint, segment, position, 10)
+		this.state = false 
+	} 
+	new (id : UUID, entryPoint : RoadConnection, segment : RoadSegment, position : float, state : boolean)  
+	{
+		super(id, entryPoint, segment, position, 10)
+		this.state = state 
+	}
+	
+	
+	def changeState()
+	{
+		this.state = !this.state
+		if(!this.state)
+			this.length = 10
+		else
+			this.length = 0
+	}
+	def getState()
+	{
+		return this.state
+	}
+}

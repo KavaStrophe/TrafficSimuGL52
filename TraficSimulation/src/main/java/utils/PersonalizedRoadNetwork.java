@@ -8,14 +8,20 @@ import org.arakhne.afc.gis.road.primitive.RoadConnection;
 import org.arakhne.afc.gis.road.primitive.RoadSegment;
 import org.arakhne.afc.math.geometry.d2.afp.Rectangle2afp;
 
+import environnement.LightPanel;
+import environnement.StopPanel;
+import environnement.SpeedPanel;
+
 public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 	private ArrayList<RoadConnection> impasses = new ArrayList<RoadConnection> ();
 	private ArrayList<RoadConnection> threeRoadConnections = new ArrayList<RoadConnection>(); //Croisement entre 3 routes
 	private ArrayList<RoadConnection> fourRoadConnections = new ArrayList<RoadConnection>(); //Croisement entre au moins 4 routes
-
+	private ArrayList<StopPanel> stopPanel = new ArrayList();
+	private ArrayList<LightPanel> lightPanel = new ArrayList();
+	private ArrayList<SpeedPanel> speedPanel = new ArrayList();
+	
 	public PersonalizedRoadNetwork(Rectangle2afp<?, ?, ?, ?, ?, ?> originalBounds) {
 		super(originalBounds);
-		this.analizeNetwork();
 	}
 
 	public ArrayList<RoadConnection> getImpasses()
@@ -33,9 +39,10 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 		return this.fourRoadConnections;
 	}
 	
-	private void analizeNetwork()
+	public void analizeNetwork()
 	{
 		Collection<RoadSegment> allSegments = (Collection<RoadSegment>) this.getRoadSegments();
+
 		for (RoadSegment segment : allSegments) {
 			RoadConnection firstPoint = segment.getBeginPoint();
 			if (!impasses.contains(firstPoint) && !threeRoadConnections.contains(firstPoint) && !fourRoadConnections.contains(firstPoint)) {
@@ -59,5 +66,18 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 				}
 			}
 		}
+	}
+	
+	public ArrayList<StopPanel> getStopPanel()
+	{
+		return this.stopPanel; 
+	}
+	public ArrayList<LightPanel> getLightPanel()
+	{
+		return this.lightPanel;
+	}
+	public ArrayList<SpeedPanel> getSpeedPanel()
+	{
+		return this.speedPanel;
 	}
 }

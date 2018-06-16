@@ -18,6 +18,15 @@ abstract class AbstractStaticObject {
 	var length : float
 	var entryPoint : RoadConnection
 	var segment : RoadSegment
+
+	new (id : UUID, point : RoadConnection, segment : RoadSegment, position : float, lenght : float)
+	{
+		this.position = position
+		this.id = id
+		this.length = length
+		this.entryPoint = point
+		this.segment = segment
+	}
 	
 	new (id : UUID, point : RoadConnection, lenght : float)
 	{

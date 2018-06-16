@@ -1,0 +1,100 @@
+/** 
+ * Tous les panneaux
+ */
+package environnement
+
+import org.arakhne.afc.gis.road.primitive.RoadConnection
+import java.util.UUID
+import java.util.ArrayList
+
+/** 
+ * @author Nicolas
+ * 
+ */
+class LightRoadConnection {
+	var point : RoadConnection
+	var timeCycle = 0
+	var openTime : int
+	var secureTime : int
+	var cycle = 0
+	var lightPanelsPairs = new ArrayList<ArrayList<LightPanel>>()
+	var lightPanels = new ArrayList<LightPanel>()
+
+	new (point : RoadConnection)  {
+		this.point = point
+		this.openTime = 10
+		this.secureTime = 3
+	}
+	new (point : RoadConnection, openTime : int, secureTime : int){
+		this(point)
+		this.openTime = openTime
+		this.secureTime = secureTime
+	}
+	
+	def getPoint() : RoadConnection{
+		return this.point
+	}
+	def addLightPanel(panels : ArrayList<LightPanel>)
+	{ 
+		for(panel : panels)
+		{
+			addLightPanel(panel)
+		}
+	}
+	def addLightPanel(panel : LightPanel)
+	{
+		this.lightPanels.add(panel)
+		for (pairPanel : this.lightPanelsPairs)
+		{
+			if(pairPanel.size() < 2)
+			{
+				pairPanel.add(panel)
+				return
+			}
+		}
+		var newPairOfLightPanel = new ArrayList<LightPanel>(2)
+		newPairOfLightPanel.add(panel)
+		this.lightPanelsPairs.add(newPairOfLightPanel)
+		return
+	}
+	def incrTimeCycle()
+	{
+		this.timeCycle++
+		if (totalCycleTime == this.timeCycle)
+		{
+			this.timeCycle = 0
+			this.cycle++
+			if (cycle > lightPanelsPairs.size())
+			{
+				this.cycle = 0
+			}
+			newCycle()
+		}
+		else if (timeCycle == openTime)
+		{
+			closeWays()
+		}
+	}
+	def closeWays()
+	{
+		for (panel : lightPanels)
+		{
+			panel.changeState
+		}
+	}
+	def newCycle()
+	{
+		for (panel : lightPanelsPairs.get(cycle))
+		{
+			panel.changeState
+		}
+	}
+	def getTotalCycleTime() : int
+	{
+		return openTime + secureTime
+	}
+	def getTotalPairOfLightPanel() : int
+	{
+		return this.lightPanels.size()
+	}
+}

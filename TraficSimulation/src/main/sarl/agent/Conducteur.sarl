@@ -42,7 +42,7 @@ agent Conducteur {
 	on Destroy {
 		killMe
 	}
-	
+	 
 	on GPSPathReturn{
 		this.gpsPath = new ArrayList(occurrence.gpsPath.toArray)
 	}
@@ -57,6 +57,10 @@ agent Conducteur {
 	def computeInfluence()
 	{
 		var acc : float
+		while(this.body.segment != this.gpsPath.get(0))
+		{
+			this.gpsPath.remove(0)
+		}
 		var selectedPath = this.gpsPath
 		/*var obj = NextObjectOnPath(percepts)
 		computeMaxSpeed(percepts)
