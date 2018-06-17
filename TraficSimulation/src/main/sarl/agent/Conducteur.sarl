@@ -17,6 +17,7 @@ import io.sarl.core.Lifecycle
 import io.sarl.core.Logging
 import java.util.ArrayList
 import org.arakhne.afc.gis.road.primitive.RoadSegment
+import events.TargetReached
 
 /** 
  * @author Nicolas
@@ -47,6 +48,18 @@ agent Conducteur {
 	on NeedInfluence{
 		this.percepts = occurrence.percepts
 		this.body = occurrence.body
+		if(this.body.gps.size() == 0)
+		{
+			if (this.body.position == this.body.segment.length || this.body.position == 0)
+			{
+				if (this.body.entryPoint == this.body.segment.beginPoint &&
+					this.body.position == this.body.segment.length)
+					emit(new TargetReached())
+				else if(this.body.entryPoint == this.body.segment.endPoint &&
+					this.body.position == 0)
+					emit(new TargetReached())
+			}
+		}
 		computeInfluence() 
 	}
 	
