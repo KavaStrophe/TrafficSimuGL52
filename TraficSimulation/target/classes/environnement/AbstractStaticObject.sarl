@@ -51,7 +51,7 @@ abstract class AbstractStaticObject {
 		this.entryPoint === object.entryPoint)
 			return true
 		else 
-			return false
+			return false 
 	} 
 	def setLength(length : float)
 	{
@@ -86,7 +86,7 @@ abstract class AbstractStaticObject {
 		return this.entryPoint
 	}
 	def getPosition2d() : Point2d
-	{
+	{ 
 		return this.segment.getGeoLocationForDistance(this.position)
 	}
 }

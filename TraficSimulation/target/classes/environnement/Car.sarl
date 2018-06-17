@@ -38,7 +38,7 @@ class Car extends AbstractMobileObject{
 		this.length = model.length
 		this.maxSpeed = model.maxSpeed
 		this.maxAcc = model.maxAcc
-		this.model = model
+		this.model = model 
 	} 
 	def getMaxSpeed : float
 	{
@@ -48,7 +48,7 @@ class Car extends AbstractMobileObject{
 	def getMaxAcc : float {
 		return this.model.maxAcc
 	}
-
+ 
 	def getMinAcc : float {
 		return this.model.minAcc
 	}

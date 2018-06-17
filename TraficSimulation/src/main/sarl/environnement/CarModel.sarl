@@ -21,9 +21,9 @@ class CarModel {
 	new(length : float, maxSpeed : float, maxAcc : float, maxDesc : float, color : Color, name : String, viewDistance : float)
 	{
 		this.length = length
-		this.maxLinearSpeed = maxSpeed
-		this.maxLinearAcceleration = maxAcc
-		this.maxLinearDesceleration = maxDesc
+		this.maxLinearSpeed = convertKHtoMS(maxSpeed)
+		this.maxLinearAcceleration = convertKHtoMS(maxAcc)
+		this.maxLinearDesceleration = convertKHtoMS(maxDesc)
 		this.viewDistance = viewDistance
 		this.color = color
 		this.name = name
@@ -54,6 +54,11 @@ class CarModel {
 	}
 	def getViewDistance : float {
 		return this.viewDistance
+	}
+	def convertKHtoMS(speedPerKilometerHour : float)
+	{
+		var speedPerMeterSecond = (speedPerKilometerHour * 1000) / 3600
+		return speedPerMeterSecond
 	}
 	
 }

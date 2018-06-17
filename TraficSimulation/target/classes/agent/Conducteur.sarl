@@ -54,19 +54,7 @@ agent Conducteur {
 	{
 		var acc : float
 		this.maxSpeed = 50 // A remplacer par véritable limite de vitesse
-		if (this.body.gps == null)
-		{
-			acc = 0
-		}
-		else
-		{
-			while (this.body.segment != this.body.gps.get(0))
-			{
-				this.body.gps.remove(0)
-			}
-			acc = 20
-			
-		}
+		acc = this.seeking.run(this.body, this.maxSpeed) 
 		var selectedPath = this.body.gps 
 		/*var obj = NextObjectOnPath(percepts)
 		computeMaxSpeed(percepts)

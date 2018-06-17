@@ -51,7 +51,7 @@ class LightRoadConnection {
 				pairPanel.add(panel)
 				return
 			}
-		}
+		} 
 		var newPairOfLightPanel = new ArrayList<LightPanel>(2)
 		newPairOfLightPanel.add(panel)
 		this.lightPanelsPairs.add(newPairOfLightPanel)

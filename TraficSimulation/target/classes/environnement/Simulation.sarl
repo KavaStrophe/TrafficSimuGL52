@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap
 import traficWindow.CarLayer
 import org.arakhne.afc.math.geometry.d2.d.Rectangle2d
 import javafx.scene.paint.Color
+import java.util.stream.StreamSupport
 
 /** 
  * @author Nicolas
@@ -54,7 +55,7 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
-	var timespace : int = 1000
+	var timespace : int = 300
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
@@ -134,7 +135,16 @@ agent Simulation{
 
 		var aStar = new RoadAStar()
 		roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
-		return new ArrayList(roads.toArray())
+		var newPathRoad : ArrayList<RoadSegment> = new ArrayList(roads.toArray())
+		return newPathRoad
+	}
+	def redefinesGPSPath(car : Car) : ArrayList<RoadSegment>{
+		var newPath = car.gps
+		if (newPath.get(0) == car.segment) {
+			newPath.remove(0) 
+		}
+
+		return newPath
 	}
 	def generateDefaultPanels()
 	{
@@ -352,57 +362,70 @@ agent Simulation{
 	def consumeInfluenceFor(car : Car,  influence : InfluenceAgent) {
 		var roads = influence.roads
 		var acceleration = influence.acceleration
-		var actuSpeed = car.speed
-		// var newVitesse = (acceleration * this.timespace) + actuSpeed
-		var newVitesse = acceleration + actuSpeed
-		move(car, newVitesse, roads)
+		car.speed = car.speed + acceleration
+		var distance = (car.speed * (this.timespace/1000.0)).floatValue
+		/*System.out.println(this.timespace)
+		System.out.println(this.timespace / 1000.0)
+		System.out.println(car.speed)
+		System.out.println(distance)*/
+		move(car, distance, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
-		System.out.println(car.position)
 		var segment = car.segment
 		var segmentBeginPoint = segment.beginPoint 
 		var entryPoint = car.entryPoint
 		var distanceRest : float
 		var endPoint : RoadConnection
+		var newPosition : float
 		if (entryPoint == segmentBeginPoint)
 		{
-			distanceRest = segment.getDistanceToEnd(car.position).floatValue
+			distanceRest = (segment.length - car.position).floatValue
+			//segment.getDistanceToEnd(car.position).floatValue
 			endPoint = segment.endPoint
+			newPosition = car.position + distance
 		}
 		else
 		{
-			distanceRest = segment.getDistanceFromStart(car.position).floatValue
+			distanceRest = car.position
+			//segment.getDistanceFromStart(car.position).floatValue
 			endPoint = segment.beginPoint
+			newPosition = car.position - distance
 		}
-		
-		
-		if(distanceRest < distance)
+
+		System.out.println("POSITION : " + car.position)
+		System.out.println("DISTANCE : " + distance)
+		System.out.println("RESTE :    " + distanceRest)
+		if(0 > (distanceRest - distance))
 		{
-			/*if (endPoint.getConnectedSegmentCount == 1)
-			{
-				var idAgent : UUID
-				
-				for (id :  this.agentBodies.keySet())
-					{
-						if (this.agentBodies.get(id) == car)
-						idAgent = id
-				}
-				removeAgentFromTheSimulation(idAgent)
-			}*/
+			System.out.println("OUT")
 			var nextRoad = roads.get(0)
+			/*var testBool = false
+			for(road : endPoint.connectedSegments)
+			{
+				if(road == nextRoad)
+					testBool = true
+			}
+			if (!testBool) { System.out.println("ERREUR ROAD !")}*/
 			roads.remove(0)
 			car.entryPoint = endPoint
+			car.segment = nextRoad
 			if (nextRoad.beginPoint == endPoint)
+			{
 				car.position = 0
+			}
 			else
+			{
 				car.position = nextRoad.length.floatValue
+			}
+			distanceRest = (distanceRest - distance) * -1
 
-			move(car, (distance - distanceRest), roads)
+			move(car, distanceRest, roads)
 		}
 		else
 		{
-			car.position = car.position + distance
+			car.position = newPosition
 			moveCarToSegment(car, car.segment)
+			car.gps = redefinesGPSPath(car)
 		}
 	}
 }
