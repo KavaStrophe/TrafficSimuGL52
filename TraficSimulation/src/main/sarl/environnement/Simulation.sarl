@@ -30,7 +30,15 @@ import traficWindow.RoadRenderer
 import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
 import utils.ThreadComputer
 import java.util.Arrays
+<<<<<<< HEAD
 import javafx.scene.paint.Color
+=======
+import org.arakhne.afc.util.InformedArrayList;
+import org.arakhne.afc.math.geometry.d2.d.Point2d;
+import java.util.concurrent.ConcurrentHashMap
+import traficWindow.CarLayer
+import org.arakhne.afc.math.geometry.d2.d.Rectangle2d
+>>>>>>> 0de358abf6ee535c09ec19ba0b10111e17ac3e42
 
 /** 
  * @author Nicolas
@@ -44,6 +52,7 @@ agent Simulation{
 	var  roadNetwork : PersonalizedRoadNetwork
 	var agents : ArrayList<UUID> = new ArrayList<UUID>
 	var agentBodies : HashMap<UUID, Car> = new HashMap<UUID, Car> 
+	var agentBodies : ConcurrentHashMap<UUID, Car> = new ConcurrentHashMap<UUID, Car> 
 	var influences : HashMap<UUID, InfluenceAgent> = new HashMap<UUID, InfluenceAgent>
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
@@ -55,16 +64,45 @@ agent Simulation{
 	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
+		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
+		
+		 
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 		generateDefaultPanels()
 		
 		//ConfRenderer.render()
 
+<<<<<<< HEAD
 		//roadRenderer.test();
 		var carModel1 = new CarModel(10, 20, 20, 20, new Color(0,0,0, 0), "TEST", 150)
 		addModel(carModel1)
 		addAgentToTheSimulation(carModel1, 0)
 		wake(new BeginLoop)
+=======
+		/*
+		//Car elements
+		var car_elements : InformedArrayList<Point2d> = new InformedArrayList();
+		car_elements.add(new Point2d(0.0, 20.0));
+		car_elements.add(new Point2d(400.0, -310.0));
+		this.roadRenderer.setCars(car_elements);
+		//Traffic light panel
+		var light_panel_elements : InformedArrayList<Point2d> = new InformedArrayList();
+		light_panel_elements.add(new Point2d(185.0, -275.0));
+		light_panel_elements.add(new Point2d(325.0, -147.0));
+		var light_panel_state : InformedArrayList<Boolean> = new InformedArrayList();
+		light_panel_state.add(true); //green light
+		light_panel_state.add(false); //red light
+		//Stop and speed panels
+		var road_panel_elements : InformedArrayList<Point2d> = new InformedArrayList();
+		road_panel_elements.add(new Point2d(-45.0, -335.0));
+		road_panel_elements.add(new Point2d(185.0, -132.0));
+		var road_panel_type : InformedArrayList<String> = new InformedArrayList();
+		road_panel_type.add("stop");
+		road_panel_type.add("speed");
+		
+		this.roadRenderer.setPannels(road_panel_elements, road_panel_type, light_panel_elements, light_panel_state);
+		*/
+>>>>>>> 0de358abf6ee535c09ec19ba0b10111e17ac3e42
 	} 
 	
 	on BeginLoop{
