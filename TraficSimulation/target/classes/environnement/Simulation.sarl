@@ -55,7 +55,7 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
-	var timespace : int = 300
+	var timespace : int = 50
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
@@ -139,11 +139,12 @@ agent Simulation{
 		return newPathRoad
 	}
 	def redefinesGPSPath(car : Car) : ArrayList<RoadSegment>{
+		if (car.gps.size() == 0)
+			return car.gps
 		var newPath = car.gps
 		if (newPath.get(0) == car.segment) {
 			newPath.remove(0) 
 		}
-
 		return newPath
 	}
 	def generateDefaultPanels()
@@ -355,7 +356,7 @@ agent Simulation{
 	{
 		for (conduc : this.agents) {
 			if (this.agentBodies.containsKey(conduc)) {
-				consumeInfluenceFor(agentBodies.get(conduc), influences.get(conduc))
+				consumeInfluenceFor(agentBodies.get(conduc), influences.get(conduc)) 
 			}
 		}
 	}
@@ -364,10 +365,6 @@ agent Simulation{
 		var acceleration = influence.acceleration
 		car.speed = car.speed + acceleration
 		var distance = (car.speed * (this.timespace/1000.0)).floatValue
-		/*System.out.println(this.timespace)
-		System.out.println(this.timespace / 1000.0)
-		System.out.println(car.speed)
-		System.out.println(distance)*/
 		move(car, distance, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
@@ -380,46 +377,45 @@ agent Simulation{
 		if (entryPoint == segmentBeginPoint)
 		{
 			distanceRest = (segment.length - car.position).floatValue
-			//segment.getDistanceToEnd(car.position).floatValue
 			endPoint = segment.endPoint
 			newPosition = car.position + distance
 		}
 		else
 		{
 			distanceRest = car.position
-			//segment.getDistanceFromStart(car.position).floatValue
 			endPoint = segment.beginPoint
 			newPosition = car.position - distance
 		}
 
-		System.out.println("POSITION : " + car.position)
-		System.out.println("DISTANCE : " + distance)
-		System.out.println("RESTE :    " + distanceRest)
 		if(0 > (distanceRest - distance))
 		{
-			System.out.println("OUT")
-			var nextRoad = roads.get(0)
-			/*var testBool = false
-			for(road : endPoint.connectedSegments)
+			if(roads.size() == 0)
 			{
-				if(road == nextRoad)
-					testBool = true
-			}
-			if (!testBool) { System.out.println("ERREUR ROAD !")}*/
-			roads.remove(0)
-			car.entryPoint = endPoint
-			car.segment = nextRoad
-			if (nextRoad.beginPoint == endPoint)
-			{
-				car.position = 0
+				if(endPoint == car.segment.endPoint)
+					newPosition = car.segment.length.floatValue
+				else
+					newPosition = 0
+				car.position = newPosition
 			}
 			else
 			{
-				car.position = nextRoad.length.floatValue
+				var nextRoad = roads.get(0)
+	
+				roads.remove(0)
+				car.entryPoint = endPoint 
+				car.segment = nextRoad
+				if (nextRoad.beginPoint == endPoint)
+				{
+					car.position = 0
+				}
+				else
+				{
+					car.position = nextRoad.length.floatValue
+				}
+				distanceRest = (distanceRest - distance) * -1
+	
+				move(car, distanceRest, roads)
 			}
-			distanceRest = (distanceRest - distance) * -1
-
-			move(car, distanceRest, roads)
 		}
 		else
 		{
