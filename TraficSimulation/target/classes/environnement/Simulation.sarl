@@ -102,7 +102,7 @@ agent Simulation{
 	
 	on BeginLoop{
 		this.influences = new HashMap<UUID, InfluenceAgent>()
-		this.roadRenderer.carLayer.update()
+		this.roadRenderer.update()
 		//lightPanelProcess()
 		computePerceptions()
 	}
