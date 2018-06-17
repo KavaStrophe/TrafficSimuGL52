@@ -32,6 +32,9 @@ import utils.ThreadComputer
 import java.util.Arrays
 import org.arakhne.afc.util.InformedArrayList;
 import org.arakhne.afc.math.geometry.d2.d.Point2d;
+import java.util.concurrent.ConcurrentHashMap
+import traficWindow.CarLayer
+import org.arakhne.afc.math.geometry.d2.d.Rectangle2d
 
 /** 
  * @author Nicolas
@@ -44,7 +47,7 @@ agent Simulation{
 	
 	var  roadNetwork : PersonalizedRoadNetwork
 	var agents : ArrayList<UUID> = new ArrayList<UUID>
-	var agentBodies : HashMap<UUID, Car> = new HashMap<UUID, Car> 
+	var agentBodies : ConcurrentHashMap<UUID, Car> = new ConcurrentHashMap<UUID, Car> 
 	var influences : HashMap<UUID, InfluenceAgent> = new HashMap<UUID, InfluenceAgent>
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
@@ -56,6 +59,8 @@ agent Simulation{
 	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
+		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
+		
 		 
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 		generateDefaultPanels()

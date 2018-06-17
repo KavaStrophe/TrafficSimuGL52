@@ -1,10 +1,12 @@
 
 package traficWindow;
 
-import java.util.List;
+import java.util.Collection;
+
 import org.arakhne.afc.gis.mapelement.MapCircle;
 import org.arakhne.afc.gis.mapelement.MapElement;
 import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
+
 
 import environnement.Car;
 
@@ -15,13 +17,17 @@ public class CarLayer extends ArrayMapElementLayer<MapElement>
 
 	public static final int CAR_RADIUS = 20;
 	
-	private List<Car> carList;
 	
-	/** Constructor for CarLayer. carList is the list which contains the cars which need to be rendered.
+	
+	private Collection<Car> carList;
+
+	
+	
+	/** Constructor for CarLayer. carList is the collection which contains the cars which need to be rendered.
 	 * 
 	 * @param carList
 	 */
-	public CarLayer(List<Car> carList) {
+	public CarLayer(Collection<Car> carList) {
 		super();
 		this.carList = carList;
 	}

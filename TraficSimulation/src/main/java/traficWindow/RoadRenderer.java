@@ -64,13 +64,13 @@ public class RoadRenderer extends Application {
 	private volatile boolean dragging;
 	private volatile MapElement selectedRoad;
 	public static MapElementLayer<?> roadLayer;
-	public static MapElementLayer<MapCircle> carLayer = new ArrayMapElementLayer<MapCircle>();
-	public static MapElementLayer<MapCircle> panelLayer = new ArrayMapElementLayer<MapCircle>();
+	public static CarLayer carLayer;
 	
+	/*
 	public static CarDrawer car_drawer = new CarDrawer(carLayer);
 	public static LightPanelDrawer light_panel_drawer = new LightPanelDrawer(panelLayer);
 	public static RoadPanelDrawer road_panel_drawer = new RoadPanelDrawer(panelLayer);
-
+*/
 	public static final CountDownLatch latch = new CountDownLatch(1);
     public static RoadRenderer renderer = null;
     
@@ -104,8 +104,7 @@ public class RoadRenderer extends Application {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
 		layer.addMapLayer(this.carLayer);
-		layer.addMapLayer(this.panelLayer);
-
+		
 		final GISContainer container;
 		container = layer;
 
@@ -230,6 +229,10 @@ public class RoadRenderer extends Application {
 		return null;
 	}
 	
+	
+	
+	
+	/*
 	public void setCars(InformedArrayList<Point2d> car_elements)
 	{
 		this.carLayer.removeAllMapElements();
@@ -242,4 +245,5 @@ public class RoadRenderer extends Application {
 		road_panel_drawer.draw(sign_elements, type_pannel, this.roadLayer.getMapElementAt(0).getGeoLocation().toBounds2D());
 		light_panel_drawer.draw(light_elements, light_state, this.roadLayer.getMapElementAt(0).getGeoLocation().toBounds2D());
 	}
+	*/
 }
