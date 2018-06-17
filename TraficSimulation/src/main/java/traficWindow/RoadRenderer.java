@@ -64,7 +64,7 @@ public class RoadRenderer extends Application {
 	private volatile boolean dragging;
 	private volatile MapElement selectedRoad;
 	public static MapElementLayer<?> roadLayer;
-	public static CarLayer carLayer;
+	public static CarLayer carLayer; 
 	
 	/*
 	public static CarDrawer car_drawer = new CarDrawer(carLayer);

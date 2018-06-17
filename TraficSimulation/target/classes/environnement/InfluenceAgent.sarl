@@ -16,7 +16,6 @@ class InfluenceAgent {
 	
 	new(roads : ArrayList<RoadSegment>, acceleration : float)
 	{
-		System.out.println("NEWINF : " + acceleration)
 		this.acceleration = acceleration
 		this.roads = roads
 	}

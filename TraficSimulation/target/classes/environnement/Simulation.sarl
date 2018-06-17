@@ -30,15 +30,13 @@ import traficWindow.RoadRenderer
 import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
 import utils.ThreadComputer
 import java.util.Arrays
-<<<<<<< HEAD
 import javafx.scene.paint.Color
-=======
 import org.arakhne.afc.util.InformedArrayList;
 import org.arakhne.afc.math.geometry.d2.d.Point2d;
 import java.util.concurrent.ConcurrentHashMap
 import traficWindow.CarLayer
 import org.arakhne.afc.math.geometry.d2.d.Rectangle2d
->>>>>>> 0de358abf6ee535c09ec19ba0b10111e17ac3e42
+import javafx.scene.paint.Color
 
 /** 
  * @author Nicolas
@@ -56,7 +54,7 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
-	var timespace : int = 2000
+	var timespace : int = 1000
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
@@ -64,20 +62,18 @@ agent Simulation{
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
-		
 		 
+		  
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 		generateDefaultPanels()
 		
 		//ConfRenderer.render()
 
-<<<<<<< HEAD
 		//roadRenderer.test();
 		var carModel1 = new CarModel(10, 20, 20, 20, new Color(0,0,0, 0), "TEST", 150)
 		addModel(carModel1)
 		addAgentToTheSimulation(carModel1, 0)
 		wake(new BeginLoop)
-=======
 		/*
 		//Car elements
 		var car_elements : InformedArrayList<Point2d> = new InformedArrayList();
@@ -101,12 +97,12 @@ agent Simulation{
 		
 		this.roadRenderer.setPannels(road_panel_elements, road_panel_type, light_panel_elements, light_panel_state);
 		*/
->>>>>>> 0de358abf6ee535c09ec19ba0b10111e17ac3e42
 	} 
 	
 	on BeginLoop{
 		this.influences = new HashMap<UUID, InfluenceAgent>()
-		lightPanelProcess()
+		this.roadRenderer.carLayer.update()
+		//lightPanelProcess()
 		computePerceptions()
 	}
 	on EndLoop{
@@ -125,23 +121,20 @@ agent Simulation{
 		var id = occurrence.source.UUID
 		removeAgentFromTheSimulation(id)
 	}
-	on GPSPath{
+	def definesGPSPath(car : Car) : ArrayList<RoadSegment>{
 		var roads : RoadPath = null
-		if (this.agentBodies.get(occurrence.getSource.UUID) != null)
+		var entryPoint = car.entryPoint
+		var finalPoint : RoadConnection 
+		do
 		{
-			var entryPoint = this.agentBodies.get(occurrence.getSource.UUID).entryPoint
-			var finalPoint : RoadConnection 
-			do
-			{
-				var newTempID = Math.round(Math.random() * (this.roadNetwork.impasses.size() - 1)).intValue
-				finalPoint = this.roadNetwork.impasses.get(newTempID)
-			}
-			while (finalPoint == entryPoint)
-
-			var aStar = new RoadAStar()
-			roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
+			var newTempID = Math.round(Math.random() * (this.roadNetwork.impasses.size() - 1)).intValue
+			finalPoint = this.roadNetwork.impasses.get(newTempID)
 		}
-		emit(new GPSPathReturn(roads), new IdentifierScope(occurrence.source.UUID))
+		while (finalPoint == entryPoint)
+
+		var aStar = new RoadAStar()
+		roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
+		return new ArrayList(roads.toArray())
 	}
 	def generateDefaultPanels()
 	{
@@ -231,10 +224,10 @@ agent Simulation{
 	}
 	def addAgentToTheSimulation(model : CarModel, idSpawneur : int){
 		var id = spawn(Conducteur)
-		//var numSpawner = Math.floor(Math.random() * this.roadNetwork.impasses.size()).intValue
 		var point = this.roadNetwork.impasses.get(idSpawneur)
 		var segment = point.getConnectedSegment(0)
 		var car = new Car(UUID.randomUUID, point, model)
+		car.gps = definesGPSPath(car)
 		this.agents.add(id)
 		this.agentBodies.put(id, car)
 		if (this.actualNbModel.containsKey(model.name))
@@ -360,15 +353,14 @@ agent Simulation{
 		var roads = influence.roads
 		var acceleration = influence.acceleration
 		var actuSpeed = car.speed
-		var newVitesse = (acceleration * this.timespace) + actuSpeed
-		System.out.println(newVitesse)
-		System.out.println(acceleration)
-		System.out.println(this.timespace)
+		// var newVitesse = (acceleration * this.timespace) + actuSpeed
+		var newVitesse = acceleration + actuSpeed
 		move(car, newVitesse, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
+		System.out.println(car.position)
 		var segment = car.segment
-		var segmentBeginPoint = segment.beginPoint
+		var segmentBeginPoint = segment.beginPoint 
 		var entryPoint = car.entryPoint
 		var distanceRest : float
 		var endPoint : RoadConnection
@@ -382,6 +374,8 @@ agent Simulation{
 			distanceRest = segment.getDistanceFromStart(car.position).floatValue
 			endPoint = segment.beginPoint
 		}
+		
+		
 		if(distanceRest < distance)
 		{
 			/*if (endPoint.getConnectedSegmentCount == 1)
@@ -395,15 +389,14 @@ agent Simulation{
 				}
 				removeAgentFromTheSimulation(idAgent)
 			}*/
-			System.out.println(distance)
 			var nextRoad = roads.get(0)
 			roads.remove(0)
 			car.entryPoint = endPoint
-			if(nextRoad.beginPoint == endPoint)
+			if (nextRoad.beginPoint == endPoint)
 				car.position = 0
 			else
 				car.position = nextRoad.length.floatValue
-			
+
 			move(car, (distance - distanceRest), roads)
 		}
 		else

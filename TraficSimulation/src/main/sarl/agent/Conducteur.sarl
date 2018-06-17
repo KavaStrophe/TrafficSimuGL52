@@ -31,7 +31,6 @@ agent Conducteur {
 	var seeking = new BehaviorSeeking()
 	var following = new BehaviorFollowing()
 	var body : Car
-	var gpsPath : ArrayList<RoadSegment> = null
 	
 	var maxSpeed : float
 	
@@ -43,35 +42,32 @@ agent Conducteur {
 		killMe
 	}
 	 
-	on GPSPathReturn {
-		this.gpsPath = new ArrayList(occurrence.gpsPath.toArray)
-	}
 	
 	/* Reçu à la fin du traitement des perceptions par l'environnement */
 	on NeedInfluence{
 		this.percepts = occurrence.percepts
 		this.body = occurrence.body
-		computeInfluence()
+		computeInfluence() 
 	}
 	
 	def computeInfluence()
 	{
 		var acc : float
 		this.maxSpeed = 50 // A remplacer par véritable limite de vitesse
-		if (this.gpsPath == null)
+		if (this.body.gps == null)
 		{
 			acc = 0
 		}
 		else
 		{
-			while(this.body.segment != this.gpsPath.get(0))
+			while (this.body.segment != this.body.gps.get(0))
 			{
-				this.gpsPath.remove(0)
+				this.body.gps.remove(0)
 			}
 			acc = 20
 			
 		}
-		var selectedPath = this.gpsPath
+		var selectedPath = this.body.gps 
 		/*var obj = NextObjectOnPath(percepts)
 		computeMaxSpeed(percepts)
 		if(this.gpsPath == null)
@@ -88,7 +84,7 @@ agent Conducteur {
 		 */
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
-	
+	 
 	def computeDistanceBefore(object : AbstractStaticObject) : float {
 		var distance : float
 		return distance

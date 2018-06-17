@@ -15,7 +15,7 @@ public class CarLayer extends ArrayMapElementLayer<MapElement>
 {
 	
 
-	public static final int CAR_RADIUS = 20;
+	public static final int CAR_RADIUS = 3;
 	
 	
 	

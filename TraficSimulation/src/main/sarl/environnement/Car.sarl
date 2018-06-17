@@ -7,6 +7,8 @@ import environnement.CarModel
 import java.util.UUID
 import javafx.scene.paint.Color
 import org.arakhne.afc.gis.road.primitive.RoadConnection
+import org.arakhne.afc.gis.road.primitive.RoadSegment
+import java.util.ArrayList
 
 /**  
  * @author Nicolas
@@ -14,7 +16,8 @@ import org.arakhne.afc.gis.road.primitive.RoadConnection
  */
 class Car extends AbstractMobileObject{  
 	var model : CarModel 
-	var color : Color    
+	var color : Color 
+	var gps : ArrayList<RoadSegment>   
 	
 	new(id : UUID, length : float, point : RoadConnection, maxSpeed : float, maxAcc : float, minAcc : float, color : Color)
 	{
@@ -51,11 +54,19 @@ class Car extends AbstractMobileObject{
 	}
 
 	def getModel : CarModel {
-		return this.model
+		return this.model 
 	}
 
 	def getColor : Color {
 		return this.color
+	}
+	def getGps : ArrayList<RoadSegment> 
+	{
+		return this.gps
+	}
+	def setGps(roads : ArrayList<RoadSegment>)
+	{
+		this.gps = roads
 	}
 	
 }
