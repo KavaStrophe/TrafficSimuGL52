@@ -57,10 +57,11 @@ agent Simulation{
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 		generateDefaultPanels()
 		
+		/* 
 		//ConfRenderer.render()
 		System.out.println("ok");
 		System.out.println(roadRenderer);
-
+*/
 		for(panel : this.roadNetwork.stopPanel)
 		{
 			var segment = panel.segment
@@ -68,7 +69,7 @@ agent Simulation{
 			//System.out.println(segment.getUserDataCollection("PANEL"))
 		}
 
-		//roadRenderer.test();
+		roadRenderer.test();
 		//wake(new BeginLoop)
 	} 
 	

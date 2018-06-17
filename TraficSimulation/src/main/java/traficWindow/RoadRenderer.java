@@ -109,6 +109,7 @@ public class RoadRenderer extends Application {
 
 		final GisPane scrollPane = new GisPane(container);
 
+
 		final String mouseLocationPattern = Locale.getString(RoadRenderer.class, "MOUSE_POSITION"); //$NON-NLS-1$
 
 		scrollPane.setOnMouseMoved(event -> {
@@ -225,6 +226,7 @@ public class RoadRenderer extends Application {
 
 	public void test()
 	{
+		carLayer.removeAllMapElements();
 		MapCircle elm = new MapCircle(30, 30, 20);
 		elm.setColor(0xff0000);
 		this.carLayer.addMapElement(elm);
