@@ -30,6 +30,7 @@ import traficWindow.RoadRenderer
 import org.arakhne.afc.gis.road.layer.RoadNetworkLayer
 import utils.ThreadComputer
 import java.util.Arrays
+import javafx.scene.paint.Color
 
 /** 
  * @author Nicolas
@@ -47,7 +48,7 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap()
-	var timespace : int = 150
+	var timespace : int = 2000
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
@@ -58,18 +59,12 @@ agent Simulation{
 		generateDefaultPanels()
 		
 		//ConfRenderer.render()
-		System.out.println("ok");
-		System.out.println(roadRenderer);
-
-		for(panel : this.roadNetwork.stopPanel)
-		{
-			var segment = panel.segment
-			//System.out.println(segment)
-			//System.out.println(segment.getUserDataCollection("PANEL"))
-		}
 
 		//roadRenderer.test();
-		//wake(new BeginLoop)
+		var carModel1 = new CarModel(10, 20, 20, 20, new Color(0,0,0, 0), "TEST", 150)
+		addModel(carModel1)
+		addAgentToTheSimulation(carModel1, 0)
+		wake(new BeginLoop)
 	} 
 	
 	on BeginLoop{
@@ -101,7 +96,8 @@ agent Simulation{
 			var finalPoint : RoadConnection 
 			do
 			{
-				finalPoint = this.roadNetwork.impasses.get(Math.round(Math.random() * this.roadNetwork.impasses.size()).intValue - 1)
+				var newTempID = Math.round(Math.random() * (this.roadNetwork.impasses.size() - 1)).intValue
+				finalPoint = this.roadNetwork.impasses.get(newTempID)
 			}
 			while (finalPoint == entryPoint)
 
@@ -110,7 +106,6 @@ agent Simulation{
 		}
 		emit(new GPSPathReturn(roads), new IdentifierScope(occurrence.source.UUID))
 	}
-
 	def generateDefaultPanels()
 	{
 		this.roadNetwork.analizeNetwork
@@ -228,14 +223,6 @@ agent Simulation{
 			this.actualNbModel.put(model.name, 1)
 	}
 	def removeObjectFromHisSegment(type : String, obj : AbstractStaticObject) {
-		/*var segment = obj.segment
-		var antUserData = segment.getUserDataCollection(type)
-		var newUserData = new ArrayList()
-		newUserData.addAll(Arrays.asList(antUserData))
-		newUserData.remove(obj)
-	
-			 * segment.addUserData(type, newUserData)
-			 */
 		obj.segment.removeUserData(type, obj)
 	}
 	def addObjectToThisSegment(type : String, obj : AbstractStaticObject, segment : RoadSegment){
@@ -258,9 +245,9 @@ agent Simulation{
 	def computePerceptionsFor(body : Car) : ArrayList<AbstractStaticObject> {
 		var position = body.position
 		var viewDistance = body.model.viewDistance
-		return exploreSegments(body.entryPoint, body.segment, viewDistance, position)
+		return exploreSegments(body.entryPoint, body.segment, viewDistance, position, body)
 	}
-	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float) : ArrayList<AbstractStaticObject>{
+	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float, body : AbstractStaticObject) : ArrayList<AbstractStaticObject>{
 
 		var restDisView : float
 		var newPos : float = position
@@ -286,23 +273,23 @@ agent Simulation{
 		
 		for (percept : unClassedPercepts)
 		{
-			if (percept.entryPoint == entryPoint)
+			if (percept.entryPoint == entryPoint && percept != body)
 				tempsPercepts.add(percept)
 		}
-		
 		if (restDisView < 0)
 		{
 			if(entryPoint == segment.beginPoint)
 			{
 				for (obj : tempsPercepts) {
-					if (segment.getDistanceFromStart(obj.position) <= distance)
+					if (segment.getDistanceFromStart(obj.position) <= distance  &&
+						!tempsPercepts.contains(obj))
 						tempsPercepts.add(obj)
 				}
 			}
 			else
 			{
 				for (obj : tempsPercepts) {
-					if (segment.getDistanceToEnd(obj.position) <= distance)
+					if (segment.getDistanceToEnd(obj.position) <= distance  && !tempsPercepts.contains(obj))
 						tempsPercepts.add(obj)
 				}
 			}
@@ -319,7 +306,7 @@ agent Simulation{
 				
 			percepts.addAll(tempsPercepts)
 			for (newSegment : nextPoint.connectedSegments) {
-				percepts.addAll(exploreSegments(nextPoint, newSegment, restDisView, -1))
+				percepts.addAll(exploreSegments(nextPoint, newSegment, restDisView, -1, body))
 			}
 			return percepts
 		}
@@ -337,7 +324,9 @@ agent Simulation{
 		var acceleration = influence.acceleration
 		var actuSpeed = car.speed
 		var newVitesse = (acceleration * this.timespace) + actuSpeed
-		removeObjectFromHisSegment("CAR", car)
+		System.out.println(newVitesse)
+		System.out.println(acceleration)
+		System.out.println(this.timespace)
 		move(car, newVitesse, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
@@ -358,7 +347,7 @@ agent Simulation{
 		}
 		if(distanceRest < distance)
 		{
-			if (endPoint.getConnectedSegmentCount == 1)
+			/*if (endPoint.getConnectedSegmentCount == 1)
 			{
 				var idAgent : UUID
 				
@@ -368,7 +357,8 @@ agent Simulation{
 						idAgent = id
 				}
 				removeAgentFromTheSimulation(idAgent)
-			}
+			}*/
+			System.out.println(distance)
 			var nextRoad = roads.get(0)
 			roads.remove(0)
 			car.entryPoint = endPoint
@@ -382,7 +372,7 @@ agent Simulation{
 		else
 		{
 			car.position = car.position + distance
-			addObjectToThisSegment("CAR", car, car.segment)
+			moveCarToSegment(car, car.segment)
 		}
 	}
 }

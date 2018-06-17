@@ -13,7 +13,7 @@ import org.arakhne.afc.gis.road.primitive.RoadConnection
  * 
  */
 class Car extends AbstractMobileObject{  
-	var model : CarModel
+	var model : CarModel 
 	var color : Color    
 	
 	new(id : UUID, length : float, point : RoadConnection, maxSpeed : float, maxAcc : float, minAcc : float, color : Color)
@@ -26,6 +26,7 @@ class Car extends AbstractMobileObject{
 	new(id : UUID, connect : RoadConnection, model : CarModel) { 
 		
 		this(id, model.length, connect, model.maxSpeed, model.maxAcc, model.minAcc, model.color) 
+		this.model = model
 	}
 	 
 	def setModel(model : CarModel)

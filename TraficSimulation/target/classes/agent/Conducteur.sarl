@@ -43,7 +43,7 @@ agent Conducteur {
 		killMe
 	}
 	 
-	on GPSPathReturn{
+	on GPSPathReturn {
 		this.gpsPath = new ArrayList(occurrence.gpsPath.toArray)
 	}
 	
@@ -57,9 +57,19 @@ agent Conducteur {
 	def computeInfluence()
 	{
 		var acc : float
-		while(this.body.segment != this.gpsPath.get(0))
+		this.maxSpeed = 50 // A remplacer par véritable limite de vitesse
+		if (this.gpsPath == null)
 		{
-			this.gpsPath.remove(0)
+			acc = 0
+		}
+		else
+		{
+			while(this.body.segment != this.gpsPath.get(0))
+			{
+				this.gpsPath.remove(0)
+			}
+			acc = 20
+			
 		}
 		var selectedPath = this.gpsPath
 		/*var obj = NextObjectOnPath(percepts)
@@ -74,9 +84,8 @@ agent Conducteur {
 			acc = this.following.run(this.body, distance, this.maxSpeed)
 		}
 		else
+			acc = this.seeking.run(this.body, this.maxSpeed) 
 		 */
-		this.maxSpeed = 50
-		acc = this.seeking.run(this.body, this.maxSpeed)
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
 	
