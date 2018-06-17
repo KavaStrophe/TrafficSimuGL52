@@ -46,6 +46,7 @@ import org.arakhne.afc.gis.ui.GisPane;
 import org.arakhne.afc.math.geometry.d2.d.Point2d;
 import org.arakhne.afc.math.geometry.d2.d.Rectangle2d;
 import org.arakhne.afc.text.TextUtil;
+import org.arakhne.afc.util.InformedArrayList;
 import org.arakhne.afc.vmutil.json.JsonBuffer;
 import org.arakhne.afc.vmutil.locale.Locale;
 
@@ -64,6 +65,11 @@ public class RoadRenderer extends Application {
 	private volatile MapElement selectedRoad;
 	public static MapElementLayer<?> roadLayer;
 	public static MapElementLayer<MapCircle> carLayer = new ArrayMapElementLayer<MapCircle>();
+	public static MapElementLayer<MapCircle> panelLayer = new ArrayMapElementLayer<MapCircle>();
+	
+	public static CarDrawer car_drawer = new CarDrawer(carLayer);
+	public static LightPanelDrawer light_panel_drawer = new LightPanelDrawer(panelLayer);
+	public static RoadPanelDrawer road_panel_drawer = new RoadPanelDrawer(panelLayer);
 
 	public static final CountDownLatch latch = new CountDownLatch(1);
     public static RoadRenderer renderer = null;
@@ -98,7 +104,8 @@ public class RoadRenderer extends Application {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
 		layer.addMapLayer(this.carLayer);
-		
+		layer.addMapLayer(this.panelLayer);
+
 		final GISContainer container;
 		container = layer;
 
@@ -154,7 +161,7 @@ public class RoadRenderer extends Application {
 			}
 			this.dragging = false;
 		});
-
+		
 		root.setCenter(scrollPane);
 		root.setBottom(messageBar);
 
@@ -222,12 +229,17 @@ public class RoadRenderer extends Application {
 		}
 		return null;
 	}
-
-	public void test()
+	
+	public void setCars(InformedArrayList<Point2d> car_elements)
 	{
-		MapCircle elm = new MapCircle(30, 30, 20);
-		elm.setColor(0xff0000);
-		this.carLayer.addMapElement(elm);
-		//stage.show();
+		this.carLayer.removeAllMapElements();
+		car_drawer.draw(car_elements, this.roadLayer.getMapElementAt(0).getGeoLocation().toBounds2D());
+	}
+	
+	public void setPannels(InformedArrayList<Point2d> sign_elements, InformedArrayList<String> type_pannel, InformedArrayList<Point2d> light_elements, InformedArrayList<Boolean> light_state)
+	{
+		this.panelLayer.removeAllMapElements();
+		road_panel_drawer.draw(sign_elements, type_pannel, this.roadLayer.getMapElementAt(0).getGeoLocation().toBounds2D());
+		light_panel_drawer.draw(light_elements, light_state, this.roadLayer.getMapElementAt(0).getGeoLocation().toBounds2D());
 	}
 }
