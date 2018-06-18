@@ -50,6 +50,8 @@ public class CarLayer extends ArrayMapElementLayer<MapElement>
 			this.addMapElement(mapCircle);
 			
 		}
+		
+
 	}
 	
 

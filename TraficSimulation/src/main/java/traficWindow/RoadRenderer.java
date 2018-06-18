@@ -65,6 +65,9 @@ public class RoadRenderer extends Application {
 	private volatile MapElement selectedRoad;
 	public static MapElementLayer<?> roadLayer;
 	public static CarLayer carLayer; 
+	private GisPane scrollPane;
+
+	
 	
 	/*
 	public static CarDrawer car_drawer = new CarDrawer(carLayer);
@@ -74,7 +77,7 @@ public class RoadRenderer extends Application {
 	public static final CountDownLatch latch = new CountDownLatch(1);
     public static RoadRenderer renderer = null;
     
-    private Stage stage;
+
 
 	public static RoadRenderer waitForReturn() { 
         try {
@@ -98,13 +101,22 @@ public class RoadRenderer extends Application {
         Application.launch();
     }
 	
+	
+	public void update() {
+		carLayer.update();
+		if(scrollPane != null) {
+			scrollPane.drawContent();
+		}
+	}
+	
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void start(Stage primaryStage) throws InterruptedException {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
 		layer.addMapLayer(this.carLayer);
-		
+
+	
 		final GISContainer container;
 		container = layer;
 
@@ -113,9 +125,11 @@ public class RoadRenderer extends Application {
 		final Label messageBar = new Label(""); //$NON-NLS-1$
 		messageBar.setTextAlignment(TextAlignment.CENTER);
 
-		final GisPane scrollPane = new GisPane(container);
+		scrollPane = new GisPane(container);
+	
 
 		final String mouseLocationPattern = Locale.getString(RoadRenderer.class, "MOUSE_POSITION"); //$NON-NLS-1$
+		
 
 		scrollPane.setOnMouseMoved(event -> {
 			final Point2d mousePosition = scrollPane.toDocumentPosition(event.getX(), event.getY());
