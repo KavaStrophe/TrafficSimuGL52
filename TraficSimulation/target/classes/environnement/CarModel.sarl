@@ -4,6 +4,7 @@
 package environnement
 
 import javafx.scene.paint.Color
+import utils.Converter
 
 /** 
  * @author Nicolas
@@ -21,9 +22,9 @@ class CarModel {
 	new(length : float, maxSpeed : float, maxAcc : float, maxDesc : float, color : Color, name : String, viewDistance : float)
 	{
 		this.length = length
-		this.maxLinearSpeed = convertKHtoMS(maxSpeed)
-		this.maxLinearAcceleration = convertKHtoMS(maxAcc)
-		this.maxLinearDesceleration = convertKHtoMS(maxDesc)
+		this.maxLinearSpeed = Converter.convertKHtoMS(maxSpeed)
+		this.maxLinearAcceleration = Converter.convertKHtoMS(maxAcc)
+		this.maxLinearDesceleration = Converter.convertKHtoMS(maxDesc)
 		this.viewDistance = viewDistance
 		this.color = color
 		this.name = name
@@ -54,11 +55,6 @@ class CarModel {
 	}
 	def getViewDistance : float {
 		return this.viewDistance
-	}
-	def convertKHtoMS(speedPerKilometerHour : float)
-	{
-		var speedPerMeterSecond = (speedPerKilometerHour * 1000) / 3600
-		return speedPerMeterSecond
 	}
 	
 }

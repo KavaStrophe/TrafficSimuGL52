@@ -4,7 +4,7 @@ package environnement
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import org.arakhne.afc.gis.road.primitive.RoadConnection
 
-class Percepts {
+class Percept {
 	var type : String
 	var data : Object
 	var distance : float
@@ -18,11 +18,11 @@ class Percepts {
 		this.distance = distance
 		this.segment = segment
 	}
-	def getType : String
+	def getType : String 
 	{
 		return this.type
 	}
-
+ 
 	def getData : Object {
 		return this.data
 	}
@@ -37,6 +37,14 @@ class Percepts {
 	
 	def getEntryPoint : RoadConnection{
 		return this.entryPoint
+	}
+	def setDistance(distance : float)
+	{
+		this.distance = distance
+	}
+ 
+	def addDistance(distance : float) {
+		this.distance = this.distance + distance
 	}
 	
 }

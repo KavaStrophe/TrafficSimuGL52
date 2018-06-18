@@ -1,0 +1,21 @@
+
+package test
+
+import io.sarl.core.Initialize
+import ^agent.BehaviorFollowing
+import utils.Converter
+
+agent Conducteur {
+	on Initialize {
+		var maxAccAgent : float = Converter.convertKHtoMS(10)
+		var maxDesAgent : float = Converter.convertKHtoMS(10)
+		var distanceFromObject : float = 5000
+		var currSpeed : float = Converter.convertKHtoMS(50)
+		var idealSpeed : float = Converter.convertKHtoMS(50)
+		var speedObject : float = 0
+		System.out.println(
+			(new BehaviorFollowing()).computeIDM(maxAccAgent, maxDesAgent, distanceFromObject, currSpeed, idealSpeed,
+				speedObject))
+		
+	}
+}

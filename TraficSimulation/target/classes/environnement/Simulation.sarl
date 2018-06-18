@@ -51,8 +51,8 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap() 
-	var timeloop : int = 300
-	var nbTimeSpaceInTimeLoop : int = 10
+	var timeloop : int = 1000
+	var nbTimeSpaceInTimeLoop : int = 60
 	var timespace : int = timeloop / nbTimeSpaceInTimeLoop
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
@@ -67,37 +67,15 @@ agent Simulation{
 		//ConfRenderer.render()
 
 		//roadRenderer.test();
-		var carModel1 = new CarModel(10, 20, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
+		var carModel1 = new CarModel(10, 20, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 300)
 		var carModel2 = new CarModel(10, 20, 5, 5, new Color(0.9, 0, 0, 0), "TEST2", 150)
 		
 		addModel(carModel1)
 		addModel(carModel2)
-		this.desiredNbModel.put(carModel1.name, 10)
-		this.desiredNbModel.put(carModel2.name, 10)
+		this.desiredNbModel.put(carModel1.name, 0)
+		this.desiredNbModel.put(carModel2.name, 1)
 		wake(new BeginLoop)
-		/*
-		//Car elements
-		var car_elements : InformedArrayList<Point2d> = new InformedArrayList();
-		car_elements.add(new Point2d(0.0, 20.0));
-		car_elements.add(new Point2d(400.0, -310.0));
-		this.roadRenderer.setCars(car_elements);
-		//Traffic light panel
-		var light_panel_elements : InformedArrayList<Point2d> = new InformedArrayList();
-		light_panel_elements.add(new Point2d(185.0, -275.0));
-		light_panel_elements.add(new Point2d(325.0, -147.0));
-		var light_panel_state : InformedArrayList<Boolean> = new InformedArrayList();
-		light_panel_state.add(true); //green light
-		light_panel_state.add(false); //red light
-		//Stop and speed panels
-		var road_panel_elements : InformedArrayList<Point2d> = new InformedArrayList();
-		road_panel_elements.add(new Point2d(-45.0, -335.0));
-		road_panel_elements.add(new Point2d(185.0, -132.0));
-		var road_panel_type : InformedArrayList<String> = new InformedArrayList();
-		road_panel_type.add("stop");
-		road_panel_type.add("speed");
 		
-		this.roadRenderer.setPannels(road_panel_elements, road_panel_type, light_panel_elements, light_panel_state);
-		*/
 	} 
 	
 	on BeginLoop {
@@ -137,8 +115,10 @@ agent Simulation{
 	on IamAtHome{
 		this.carAtHome.add(occurrence.source.UUID)
 	}
+	
+	
 	def computeNewCars()
-	{
+	{ 
 		var sizeImpasses = this.roadNetwork.impasses.size()
 		//System.out.println(this.roadNetwork.impasses.size())
 		for(var i = 0; i < sizeImpasses; i++)
@@ -171,7 +151,7 @@ agent Simulation{
 			{
 				break;
 			}
-
+			//System.out.println(newCarModel)
 			addAgentToTheSimulation(newCarModel, i)
 		}
 	}
@@ -198,7 +178,7 @@ agent Simulation{
 			roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
 		}
 		while(roads == null)
-		System.out.println(roads)
+		//System.out.println(roads)
 		var newPathRoad : ArrayList<RoadSegment> = new ArrayList(roads.toArray())
 		return newPathRoad
 	}
@@ -303,59 +283,126 @@ agent Simulation{
 			}
 		}
 	}
-	def computePerceptionsFor(body : Car) : HashSet<AbstractStaticObject> {
+	def computePerceptionsFor(body : Car) : HashSet<Percept> {
+		//System.out.println("NEW PERCEPT COMPUTATION")
 		var position = body.position
 		var viewDistance = body.model.viewDistance
-		return exploreSegments(body.entryPoint, body.segment, viewDistance, position, body)
+		var openList = new HashSet<RoadSegment>()
+		return exploreSegments(body.entryPoint, body.segment, viewDistance, position, body, openList)
 	}
-	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float, body : AbstractStaticObject) : HashSet<AbstractStaticObject>{
-
-		var restDisView : float
-		var newPos : float = position
-		var percepts = new HashSet<AbstractStaticObject>
-		if (entryPoint == segment.beginPoint) {
-			if (newPos == -1)
-				newPos = 0
-			restDisView = distance - segment.getDistanceToEnd(newPos).floatValue
-
-		} else { 
-			if (newPos == -1)
-				newPos = segment.getDistanceToEnd(0).floatValue
-			restDisView = distance - segment.getDistanceFromStart(newPos).floatValue
-
+	def roadObjectToPercept(objs : HashSet<AbstractStaticObject>, position : float) : HashSet<Percept>
+	{
+		var percepts : HashSet<Percept> = new HashSet<Percept>()
+		for (obj : objs) {
+			var distanceBetween = obj.position - position
+			var type : String
+			var data : Object
+			var speed : float = 0
+			if (distanceBetween < 0)
+				distanceBetween *= -1
+			/*System.out.println("OBJ : " + obj.position)
+			System.out.println("SEG : " + obj.segment.length)
+			System.out.println("CAR : " + position)
+			System.out.println("BET : " + distanceBetween)*/
+			
+			if (obj instanceof StopPanel) {
+				type = "STOP"
+			}
+			else if (obj instanceof LightPanel) {
+				type = "LIGHT"
+				data = obj.state
+			} else if (obj instanceof SpeedPanel) {
+				type = "SPEEDPANEL"
+				data = obj.speed
+			} else if (obj instanceof Car) {
+				type = "CAR"
+				data = obj.speed
+			}		
+			percepts.add(new Percept(type, distanceBetween, obj.segment, obj.entryPoint, data))
+				
 		}
 
+		return percepts
+	}
+	def setDistancePerceptsHashSet(percepts : HashSet<Percept>, distance : float) : HashSet<Percept>
+	{
+		var newPercepts : HashSet<Percept> = new HashSet<Percept>
+		for(percept : percepts)
+		{
+			newPercepts.add(new Percept(
+				percept.type,
+				percept.distance + distance,
+				percept.segment, 
+				percept.entryPoint,
+				percept.data
+			)) 
+		}
+		return newPercepts
+	}
+
+	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float,
+		body : AbstractStaticObject, openList : HashSet<RoadSegment>) : HashSet<Percept> {
+		var bodyToEnd : float
+		var restDisView : float
+		var newPos : float = position
+		var percepts = new HashSet<Percept>
+		openList.add(segment) //Ajout du segment actuel à la liste ouverte des segments explorés
+		
+		//Dans le cas où la voiture explore "virtuellement" le segment (à distance)
+		if (entryPoint == segment.beginPoint){
+			if (newPos == -1) 
+				newPos = 0
+			bodyToEnd = segment.length.floatValue - newPos
+
+		}
+		else{
+			if (newPos == -1) 
+				newPos = segment.length.floatValue
+			bodyToEnd = newPos
+		}
+
+		bodyToEnd = segment.length.floatValue - newPos
+		restDisView = distance - bodyToEnd
+		var visiblePercepts = new HashSet<AbstractStaticObject>
 		var tempsPercepts = new HashSet<AbstractStaticObject>
 		var unClassedPercepts = new ArrayList<AbstractStaticObject>
+		
+		//Récupération de tous les éléments du segment
 		if (segment.hasUserData("PANEL"))
 			unClassedPercepts.addAll(segment.getUserDataCollection("PANEL"))
 		if (segment.hasUserData("CAR"))
 			unClassedPercepts.addAll(segment.getUserDataCollection("CAR"))
 		
+		//On retire tout ce qui est dérrière la voiture ou qui est la voiture elle-même
 		for (percept : unClassedPercepts)
 		{
 			if (percept.entryPoint == entryPoint && percept != body)
 				tempsPercepts.add(percept)
 		}
+
+		
+		//Si la voiture n'a pas la capacité de voir jusqu'au bout de la route
 		if (restDisView < 0)
 		{
+			//Création d'une nouvelle variable contenant les éléments en vue
 			if(entryPoint == segment.beginPoint)
 			{
 				for (obj : tempsPercepts) {
-					if (segment.getDistanceFromStart(obj.position) <= distance  &&
-						!tempsPercepts.contains(obj))
-						tempsPercepts.add(obj)
+					if (segment.getDistanceFromStart(obj.position) <= distance)
+						visiblePercepts.add(obj)
 				}
-			}
+			} 
 			else
 			{
 				for (obj : tempsPercepts) {
-					if (segment.getDistanceToEnd(obj.position) <= distance  && !tempsPercepts.contains(obj))
-						tempsPercepts.add(obj)
+					if (segment.getDistanceToEnd(obj.position) <= distance)
+						visiblePercepts.add(obj)
 				}
 			}
+			percepts = roadObjectToPercept(visiblePercepts, newPos)
 			return percepts
 		}
+		//Si la voiture voit plus loin que la fin de la route
 		else
 		{
 			var nextPoint : RoadConnection
@@ -365,16 +412,17 @@ agent Simulation{
 			else
 				nextPoint = segment.beginPoint
 				
-			percepts.addAll(tempsPercepts)			
+			percepts = roadObjectToPercept(tempsPercepts, newPos)			
 			if(nextPoint != null)
 			{
-				//System.out.println("POINTSTART")
-				//System.out.println("POINT : " + nextPoint.connectedSegments.size())
-				var nbConnectedSegments = nextPoint.connectedSegments.size()
+				var nbConnectedSegments = nextPoint.connectedSegments.size() //  for(segment : nextPoint.connectedSegments) provoque quelques fois une erreur
+				//Recherche dans les segments connectés qui n'ont pas déjà été explorés
 				for (var i = 0; i < nbConnectedSegments; i++) {
 					var newSegment = nextPoint.getConnectedSegment(i)
-					if (newSegment != body.segment) {
-						percepts.addAll(exploreSegments(nextPoint, newSegment, restDisView, -1, body))
+					if (!(openList.contains(newSegment))){
+						var newPercepts = exploreSegments(nextPoint, newSegment, restDisView, -1, body, openList)
+						newPercepts = setDistancePerceptsHashSet(newPercepts, bodyToEnd)
+						percepts.addAll(newPercepts)
 					}
 				}
 			}
@@ -394,7 +442,7 @@ agent Simulation{
 			return
 		var roads = influence.roads
 		var acceleration = influence.acceleration
-		car.speed = car.speed + acceleration
+		car.speed = car.speed + (acceleration / nbTimeSpaceInTimeLoop)
 		var distance = (car.speed * (this.timespace/1000.0)).floatValue
 		/*System.out.println("CAR : " + car)
 		System.out.println("DISTANCE : " + distance)

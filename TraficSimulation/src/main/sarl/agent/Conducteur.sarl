@@ -20,6 +20,7 @@ import org.arakhne.afc.gis.road.primitive.RoadSegment
 import events.AreYouAtHome
 import events.IamAtHome
 import java.util.HashSet
+import environnement.Percept
 
 /** 
  * @author Nicolas
@@ -30,12 +31,12 @@ agent Conducteur {
 	uses Lifecycle
 	uses DefaultContextInteractions
 	
-	var percepts : HashSet<AbstractStaticObject>
+	var percepts : HashSet<Percept>
 	var seeking = new BehaviorSeeking()
 	var following = new BehaviorFollowing()
 	var body : Car
 	
-	var maxSpeed : float
+	var maxSpeed : Integer = 0
 	
 	on Initialize {
 		emit(new GPSPath())
@@ -50,22 +51,62 @@ agent Conducteur {
 	on NeedInfluence{
 		this.percepts = occurrence.percepts
 		this.body = occurrence.body
+		if (this.maxSpeed == 0) 
+			this.maxSpeed = this.body.maxSpeed.intValue
+		
 		computeInfluence() 
 	} 
 	
 	def computeInfluence()
 	{
+		/*System.out.println(this.body.speed)
+		System.out.println(this.maxSpeed)*/
 		var selectedPath = this.body.gps 
 		var acc : float
-		if(amIAtHome)
+		if(amIAtHome) 
 		{
 			acc = 0
 			emit(new IamAtHome(true))
 		}
 		else
 		{
-			this.maxSpeed = getMaxSpeed() // A remplacer par véritable limite de vitesse
-			acc = this.seeking.run(this.body, this.maxSpeed)
+
+			var maxSpeedTemp : Percept = null
+			var obstacleTemp : Percept = null
+			var obstacleSpeed : float = 0
+			// On ne retient que les Percept sur notre chemin
+			for (percept : percepts) {
+				if (selectedPath.contains(percept.segment))
+				{
+					if (percept.distance < 30 && percept.type == "SPEED") {
+						if (maxSpeedTemp == null || maxSpeedTemp.distance > percept.distance)
+							maxSpeedTemp = percept
+					}
+					else if (percept.type == "CAR") {
+						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
+							obstacleTemp = percept
+							obstacleSpeed = percept.data as Float
+					}
+					else if(percept.type == "LIGHT" && percept.data == false)
+					{
+						obstacleTemp = percept
+						obstacleSpeed = 0
+					}
+				}
+			}
+			if (obstacleTemp != null)
+			{
+				System.out.println("============================================================")
+				System.out.println("TYPE OBS : " + obstacleTemp.type)
+				System.out.println("DISTANCE OBS : " + obstacleTemp.distance)
+				System.out.println("TAILE SEGMENT : " + this.body.segment.length)
+				System.out.println("BODY POSITION : " + this.body.position)
+				System.out.println(this.maxSpeed)
+				acc = this.following.run(this.body, obstacleTemp.distance, this.maxSpeed, obstacleSpeed)
+				System.out.println("ACCELERATION FINALE : " + acc)
+			}
+			else
+				acc = this.seeking.run(this.body, this.maxSpeed)
 		}
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
@@ -84,13 +125,6 @@ agent Conducteur {
 		return false
 	}
 	 
-	 //TODO
-	 def getMaxSpeed()
-	{
-		var percepts = this.percepts
-		
-		return 50
-	}
 	def computeDistanceBefore(object : AbstractStaticObject) : float {
 		var distance : float
 		return distance

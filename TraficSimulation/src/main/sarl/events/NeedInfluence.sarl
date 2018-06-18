@@ -6,6 +6,7 @@ package events
 import environnement.AbstractStaticObject
 import environnement.Car
 import java.util.HashSet
+import environnement.Percept
 
 /** 
  * @author Nicolas
@@ -13,10 +14,10 @@ import java.util.HashSet
  */
 event NeedInfluence
 {
-	var percepts : HashSet<AbstractStaticObject>
+	var percepts : HashSet<Percept>
 	var body : Car 
-	
-	new(percepts : HashSet<AbstractStaticObject>, body : Car)
+	 
+	new(percepts : HashSet<Percept>, body : Car)
 	{
 		this.percepts = percepts
 		this.body = body
