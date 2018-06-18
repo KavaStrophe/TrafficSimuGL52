@@ -1,0 +1,22 @@
+/** 
+ * Evènement déclenché par un agent ayant atteint son objectif
+ */
+package events
+
+/** 
+ * @author Nicolas
+ * 
+ */
+event IamAtHome
+{
+	var arrived : Boolean 
+
+	new(arrived : Boolean)
+	{
+		this.arrived = arrived
+	}
+
+	new() {
+		arrived = false
+	} 
+}
