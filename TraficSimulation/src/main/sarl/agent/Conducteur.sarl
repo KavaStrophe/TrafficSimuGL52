@@ -19,6 +19,7 @@ import java.util.ArrayList
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import events.AreYouAtHome
 import events.IamAtHome
+import java.util.HashSet
 
 /** 
  * @author Nicolas
@@ -29,7 +30,7 @@ agent Conducteur {
 	uses Lifecycle
 	uses DefaultContextInteractions
 	
-	var percepts : ArrayList<AbstractStaticObject>
+	var percepts : HashSet<AbstractStaticObject>
 	var seeking = new BehaviorSeeking()
 	var following = new BehaviorFollowing()
 	var body : Car
@@ -44,20 +45,6 @@ agent Conducteur {
 		killMe
 	}
 	 
-	on AreYouAtHome {
-		var car = this.body 
-		if (car.gps.size() == 0) {
-			if (Math.round(car.position) == Math.round(car.segment.length) || car.position == 0) {
-				if (car.entryPoint == car.segment.beginPoint &&
-					Math.round(car.position) == Math.round(car.segment.length)) {
-					emit(new IamAtHome(true))
-				} else if (car.entryPoint == car.segment.endPoint && car.position == 0) {
-					emit(new IamAtHome(true)) 
-				} 
-			}
-		}
-		emit(new IamAtHome()) 
-	}
 	
 	/* Reçu à la fin du traitement des perceptions par l'environnement */
 	on NeedInfluence{
@@ -68,27 +55,42 @@ agent Conducteur {
 	
 	def computeInfluence()
 	{
-		var acc : float
-		this.maxSpeed = 50 // A remplacer par véritable limite de vitesse
-		acc = this.seeking.run(this.body, this.maxSpeed) 
 		var selectedPath = this.body.gps 
-		/*var obj = NextObjectOnPath(percepts)
-		computeMaxSpeed(percepts)
-		if(this.gpsPath == null)
-		{ 
+		var acc : float
+		if(amIAtHome)
+		{
 			acc = 0
-			emit(new GPSPath())
-		}
-		else if (obj != null){
-			var distance = computeDistanceBefore(obj)
-			acc = this.following.run(this.body, distance, this.maxSpeed)
+			emit(new IamAtHome(true))
 		}
 		else
-			acc = this.seeking.run(this.body, this.maxSpeed) 
-		 */
+		{
+			this.maxSpeed = getMaxSpeed() // A remplacer par véritable limite de vitesse
+			acc = this.seeking.run(this.body, this.maxSpeed)
+		}
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
+
+	def amIAtHome : boolean {
+		if (this.body.gps.size() == 0) {
+			if (this.body.position >= this.body.segment.length - 5 || this.body.position <= 5) {
+				if (this.body.entryPoint == this.body.segment.beginPoint &&
+					this.body.position >= this.body.segment.length - 5) {
+					return true
+				} else if (this.body.entryPoint == this.body.segment.endPoint && this.body.position <= 5) {
+					return true
+				}
+			}
+		}
+		return false
+	}
 	 
+	 //TODO
+	 def getMaxSpeed()
+	{
+		var percepts = this.percepts
+		
+		return 50
+	}
 	def computeDistanceBefore(object : AbstractStaticObject) : float {
 		var distance : float
 		return distance

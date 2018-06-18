@@ -4,7 +4,6 @@
 package environnement
 
 import ^agent.Conducteur
-import events.AreYouAtHome
 import events.BeginLoop
 import events.EndLoop
 import events.IamAtHome
@@ -17,6 +16,7 @@ import io.sarl.core.Initialize
 import io.sarl.util.IdentifierScope
 import java.util.ArrayList
 import java.util.HashMap
+import java.util.HashSet
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javafx.scene.paint.Color
@@ -32,6 +32,7 @@ import utils.PersonalizedRoadNetwork
 import utils.ThreadComputer
 
 import static extension traficWindow.RoadRenderer.*
+import java.util.Collection
 
 /** 
  * @author Nicolas
@@ -45,12 +46,14 @@ agent Simulation{
 	var  roadNetwork : PersonalizedRoadNetwork
 	var agents : ArrayList<UUID> = new ArrayList<UUID>
 	var agentBodies : ConcurrentHashMap<UUID, Car> = new ConcurrentHashMap<UUID, Car> 
-	var influences : HashMap<UUID, InfluenceAgent> = new HashMap<UUID, InfluenceAgent>
-	var isCarAtHome : HashMap<UUID, Boolean> = new HashMap<UUID, Boolean>
+	var influences : ConcurrentHashMap<UUID, InfluenceAgent> = new ConcurrentHashMap<UUID, InfluenceAgent>
+	var carAtHome : HashSet<UUID> = new HashSet<UUID>()
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap() 
-	var timespace : int = 1000
+	var timeloop : int = 300
+	var nbTimeSpaceInTimeLoop : int = 10
+	var timespace : int = timeloop / nbTimeSpaceInTimeLoop
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
@@ -58,19 +61,19 @@ agent Simulation{
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
-		 
-		  
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 		generateDefaultPanels()
 		
 		//ConfRenderer.render()
 
 		//roadRenderer.test();
-		var carModel1 = new CarModel(10, 20, 20, 20, new Color(0,0,0, 0), "TEST", 150)
+		var carModel1 = new CarModel(10, 20, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
+		var carModel2 = new CarModel(10, 20, 5, 5, new Color(0.9, 0, 0, 0), "TEST2", 150)
+		
 		addModel(carModel1)
-		addAgentToTheSimulation(carModel1, 0)
-		addAgentToTheSimulation(carModel1, 2)
-		addAgentToTheSimulation(carModel1, 5)
+		addModel(carModel2)
+		this.desiredNbModel.put(carModel1.name, 10)
+		this.desiredNbModel.put(carModel2.name, 10)
 		wake(new BeginLoop)
 		/*
 		//Car elements
@@ -98,50 +101,86 @@ agent Simulation{
 	} 
 	
 	on BeginLoop {
-		this.influences = new HashMap<UUID, InfluenceAgent>()
-		this.isCarAtHome = new HashMap<UUID, Boolean>()
-		this.roadRenderer.carLayer.update()
+		//System.out.println("CAR AT HOME ?")
+		computeCarAtHome()
+		//System.out.println("PROCESS NEW CARS")
+		computeNewCars()
+		this.carAtHome = new HashSet<UUID>()
+		this.influences = new ConcurrentHashMap<UUID, InfluenceAgent>()
 		// lightPanelProcess()
-		this.roadRenderer.update()
-		//lightPanelProcess()
-		computePerceptions()
+		//System.out.println("PROCESS PERCEPTIONS")
+		if(this.agents.size > 0)
+			computePerceptions()
+		else
+			wake(new EndLoop)
 	}
 	on EndLoop {
-		System.out.println("CONSUME INFLUENCE")
-		consumeInfluence()
-		System.out.println("BEGIN AREYOUATHOME")
-		Thread.sleep(this.timespace)
-		emit(new AreYouAtHome())
+		//System.out.println("PROCESS INFLUENCE")
+		for (var i = 0; i < nbTimeSpaceInTimeLoop; i++)
+		{
+			consumeInfluence()
+			this.roadRenderer.update()
+			Thread.sleep(this.timespace)
+		}
+		wake(new BeginLoop)
 	}
 	on SendedInfluence{
 		this.influences.put(occurrence.source.UUID, occurrence.influence)
+
+		//System.out.println("INFLUENCE SIZE : " + this.influences.size())
+		//System.out.println("BODIES SIZE : " + this.agentBodies.size())
 		if(this.influences.size() == this.agentBodies.size())
 		{
 			wake(new EndLoop)
 		}
 	}
-	on IamAtHome {
-		this.isCarAtHome.put(occurrence.source.UUID, occurrence.arrived)
-		if (this.isCarAtHome.size() == this.agentBodies.size())
+	on IamAtHome{
+		this.carAtHome.add(occurrence.source.UUID)
+	}
+	def computeNewCars()
+	{
+		var sizeImpasses = this.roadNetwork.impasses.size()
+		//System.out.println(this.roadNetwork.impasses.size())
+		for(var i = 0; i < sizeImpasses; i++)
 		{
-			var conducsToKill : ArrayList<UUID> = new ArrayList<UUID>()
-
-			System.out.println("CARATHOME : " + this.isCarAtHome)
-			System.out.println("AGENTBODY : " + this.agentBodies)
-			for (conduc : this.agents) {
-				if (this.isCarAtHome.get(conduc)) {
-					System.out.println("CONDUCTEUR : " + conduc)
-					conducsToKill.add(conduc)
-				}
-			}
-			for(conduc : conducsToKill)
+			var point = this.roadNetwork.impasses.get(i)
+			if(point.getConnectedSegment(0).getUserDataCollection("CAR").size() > 0)
 			{
-				removeAgentFromTheSimulation(conduc)
+				var carsOnTheSegment = point.getConnectedSegment(0).getUserDataCollection("CAR")
+				var spawneurFree = true
+				
+				for(car : carsOnTheSegment)
+				{
+					if(car instanceof Car)
+					{
+						if(car.entryPoint == point)
+						{
+							if ((point == car.segment.beginPoint && car.position < 20) ||
+								(point == car.segment.endPoint && car.position > car.segment.length - 20))
+								spawneurFree = !spawneurFree
+						}
+					}
+				}
+				
+				if(!spawneurFree)
+					continue
 			}
-			wake(new BeginLoop)
+			var newCarModel = chooseModelForNewAgent()
+
+			if(newCarModel == null)
+			{
+				break;
+			}
+
+			addAgentToTheSimulation(newCarModel, i)
 		}
 	}
-	
+	def computeCarAtHome()
+	{
+		for (conduc : this.carAtHome) {
+			removeAgentFromTheSimulation(conduc)
+		}
+	}
 	def definesGPSPath(car : Car) : ArrayList<RoadSegment>{
 		var roads : RoadPath = null
 		var entryPoint = car.entryPoint
@@ -154,7 +193,12 @@ agent Simulation{
 		while (finalPoint == entryPoint)
 
 		var aStar = new RoadAStar()
-		roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
+		do
+		{
+			roads = aStar.solve(entryPoint.getPoint, finalPoint, this.roadNetwork)
+		}
+		while(roads == null)
+		System.out.println(roads)
 		var newPathRoad : ArrayList<RoadSegment> = new ArrayList(roads.toArray())
 		return newPathRoad
 	}
@@ -205,10 +249,16 @@ agent Simulation{
 		for (modelName : desiredNbModel.keySet)
 		{
 			var nbDesired = desiredNbModel.get(modelName)
+			if (!actualNbModel.containsKey(modelName))
+			{
+				actualNbModel.put(modelName, 0)
+			}
 			var nbActual = actualNbModel.get(modelName)
-			
 			if(nbDesired > nbActual)
+			{
+				newModel = this.definedModels.get(modelName)
 				return newModel
+			}
 		}
 		return null
 	}
@@ -226,10 +276,7 @@ agent Simulation{
 		car.gps = definesGPSPath(car)
 		this.agents.add(id)
 		this.agentBodies.put(id, car)
-		if (this.actualNbModel.containsKey(model.name))
-			this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) + 1)
-		else
-			this.actualNbModel.put(model.name, 1)
+		this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) + 1)
 
 		this.roadNetwork.addObjectToThisSegment("CAR", car, segment)
 	}
@@ -243,44 +290,42 @@ agent Simulation{
 
 		this.agentBodies.remove(id)
 		var model = car.model
-		if (this.actualNbModel.containsKey(model.name))
-			this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) + 1)
-		else
-			this.actualNbModel.put(model.name, 1)
+		this.actualNbModel.put(model.name, this.actualNbModel.get(model.name) - 1)
+
 	}
 	def computePerceptions(){
 		for(id : this.agents)
 		{
-			if (this.agentBodies.containsKey(id)){
+			if (this.agentBodies.containsKey(id)) {
 				var agentBody = this.agentBodies.get(id)
 				var percepts = computePerceptionsFor(agentBody)
 				emit(new NeedInfluence(percepts, agentBody), new IdentifierScope(id))
 			}
 		}
 	}
-	def computePerceptionsFor(body : Car) : ArrayList<AbstractStaticObject> {
+	def computePerceptionsFor(body : Car) : HashSet<AbstractStaticObject> {
 		var position = body.position
 		var viewDistance = body.model.viewDistance
 		return exploreSegments(body.entryPoint, body.segment, viewDistance, position, body)
 	}
-	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float, body : AbstractStaticObject) : ArrayList<AbstractStaticObject>{
+	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float, body : AbstractStaticObject) : HashSet<AbstractStaticObject>{
 
 		var restDisView : float
 		var newPos : float = position
-		var percepts = new ArrayList<AbstractStaticObject>
+		var percepts = new HashSet<AbstractStaticObject>
 		if (entryPoint == segment.beginPoint) {
 			if (newPos == -1)
 				newPos = 0
 			restDisView = distance - segment.getDistanceToEnd(newPos).floatValue
 
-		} else {
+		} else { 
 			if (newPos == -1)
 				newPos = segment.getDistanceToEnd(0).floatValue
 			restDisView = distance - segment.getDistanceFromStart(newPos).floatValue
 
 		}
 
-		var tempsPercepts = new ArrayList<AbstractStaticObject>
+		var tempsPercepts = new HashSet<AbstractStaticObject>
 		var unClassedPercepts = new ArrayList<AbstractStaticObject>
 		if (segment.hasUserData("PANEL"))
 			unClassedPercepts.addAll(segment.getUserDataCollection("PANEL"))
@@ -320,11 +365,17 @@ agent Simulation{
 			else
 				nextPoint = segment.beginPoint
 				
-			percepts.addAll(tempsPercepts)
-			for (newSegment : nextPoint.connectedSegments) {
-				if(newSegment !=  body.segment)
-				{
-					percepts.addAll(exploreSegments(nextPoint, newSegment, restDisView, -1, body))
+			percepts.addAll(tempsPercepts)			
+			if(nextPoint != null)
+			{
+				//System.out.println("POINTSTART")
+				//System.out.println("POINT : " + nextPoint.connectedSegments.size())
+				var nbConnectedSegments = nextPoint.connectedSegments.size()
+				for (var i = 0; i < nbConnectedSegments; i++) {
+					var newSegment = nextPoint.getConnectedSegment(i)
+					if (newSegment != body.segment) {
+						percepts.addAll(exploreSegments(nextPoint, newSegment, restDisView, -1, body))
+					}
 				}
 			}
 			return percepts
@@ -339,14 +390,19 @@ agent Simulation{
 		}
 	}
 	def consumeInfluenceFor(car : Car,  influence : InfluenceAgent) {
+		if(influence == null)
+			return
 		var roads = influence.roads
 		var acceleration = influence.acceleration
 		car.speed = car.speed + acceleration
 		var distance = (car.speed * (this.timespace/1000.0)).floatValue
+		/*System.out.println("CAR : " + car)
+		System.out.println("DISTANCE : " + distance)
+		System.out.println("ROADS : " + roads.size())
+		System.out.println("SPEED : " + car.speed)*/
 		move(car, distance, roads)
 	}
 	def move(car : Car, distance : float, roads : ArrayList<RoadSegment>){
-		System.out.println("I MOVE : " + car)
 		var segment = car.segment
 		var segmentBeginPoint = segment.beginPoint 
 		var entryPoint = car.entryPoint
@@ -379,7 +435,8 @@ agent Simulation{
 			else
 			{
 				var nextRoad = roads.get(0)
-	
+
+				this.roadNetwork.moveCarToSegment(car, nextRoad)
 				roads.remove(0)
 				car.entryPoint = endPoint 
 				car.segment = nextRoad
@@ -392,16 +449,13 @@ agent Simulation{
 					car.position = nextRoad.length.floatValue
 				}
 				distanceRest = (distanceRest - distance) * -1
-	
 				move(car, distanceRest, roads)
 			}
 		}
 		else
 		{
 			car.position = newPosition
-			this.roadNetwork.moveCarToSegment(car, car.segment)
 			car.gps = redefinesGPSPath(car)
 		}
-		System.out.println("END OF MOVE FOR : " + car)  
 	}
 }

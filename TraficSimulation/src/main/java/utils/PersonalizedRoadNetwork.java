@@ -133,9 +133,9 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 		segment.addUserData(type, obj);
 	}
 	public void removeObjectFromHisSegment(String type, AbstractStaticObject obj) {
-		System.out.println("CARS OF THE SEGMENT : " + obj.getSegment().getUserDataCollection(type));
+		//System.out.println("OBJ : " + obj);
+		//System.out.println("COLLECT : " + obj.getSegment().getUserDataCollection(type));
 		obj.getSegment().removeUserData(type, obj);
-		System.out.println("REST OF THE SEGMENT : " + obj.getSegment().getUserDataCollection(type));
 
 	}
 	public void moveCarToSegment(Car car, RoadSegment segment) {
