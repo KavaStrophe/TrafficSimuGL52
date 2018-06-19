@@ -47,7 +47,7 @@ public class LightLayer extends ArrayMapElementLayer<MapElement>
 			int colorLight = 0;
 			MapCircle mapCircle = new MapCircle(c.getPosition2d(), LIGHT_RADIUS);
 			System.out.println(c.getState());
-			if(c.getState())
+			if(!c.getState())
 				colorLight = 0xff0000;
 			else 
 				colorLight = 0x00ff00;
