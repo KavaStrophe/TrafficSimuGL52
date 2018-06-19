@@ -22,9 +22,9 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 	private ArrayList<RoadConnection> impasses = new ArrayList<RoadConnection> ();
 	private ArrayList<RoadConnection> threeRoadConnections = new ArrayList<RoadConnection>(); //Croisement entre 3 routes
 	private ArrayList<RoadConnection> fourRoadConnections = new ArrayList<RoadConnection>(); //Croisement entre au moins 4 routes
-	private ArrayList<StopPanel> stopPanel = new ArrayList();
-	private ArrayList<LightPanel> lightPanel = new ArrayList();
-	private ArrayList<SpeedPanel> speedPanel = new ArrayList();
+	private ArrayList<StopPanel> stopPanel = new ArrayList<StopPanel>();
+	private ArrayList<LightPanel> lightPanel = new ArrayList<LightPanel>();
+	private ArrayList<SpeedPanel> speedPanel = new ArrayList<SpeedPanel>();
 	
 	public PersonalizedRoadNetwork(Rectangle2afp<?, ?, ?, ?, ?, ?> originalBounds) {
 		super(originalBounds);

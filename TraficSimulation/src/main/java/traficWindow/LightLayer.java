@@ -20,12 +20,11 @@ public class LightLayer extends ArrayMapElementLayer<MapElement>
 	public static final int LIGHT_RADIUS = 2;
 	
 	
-	
 	private Collection<LightPanel> lightList;
 
 	
 	
-	/** Constructor for CarLayer. carList is the collection which contains the cars which need to be rendered.
+	/** Constructor for LightLayer. LightList is the collection which contains the LightPanel which need to be rendered.
 	 * 
 	 * @param carList
 	 */
@@ -36,22 +35,22 @@ public class LightLayer extends ArrayMapElementLayer<MapElement>
 	
 	
 	/**
-	 * Update method for the CarLayer. Intended to be used at each frame. 
+	 * Update method for the LightLayer. Intended to be used at each frame. 
 	 * 
-	 * For each Car in CarList, it will add a circle on the layer.
+	 * For each LightPanel in lightList, it will add a red or green circle on the layer, depending on the state of the light.
 	 */
 	public void update() {
 		
 		this.removeAllMapElements();
 		for(LightPanel c : lightList) {
 			
-			// TODO : check filters
 			int colorLight = 0;
 			MapCircle mapCircle = new MapCircle(c.getPosition2d(), LIGHT_RADIUS);
+			System.out.println(c.getState());
 			if(c.getState())
-				colorLight = 0xFFFF0000;
+				colorLight = 0xff0000;
 			else 
-				colorLight = 0x00FF0000;
+				colorLight = 0x00ff00;
 			mapCircle.setColor(colorLight);
 			this.addMapElement(mapCircle);
 			

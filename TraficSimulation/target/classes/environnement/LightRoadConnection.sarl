@@ -88,7 +88,7 @@ class LightRoadConnection {
 		for (panel : lightPanelsPairs.get(cycle))
 		{
 			panel.changeState
-			System.out.println(panel.state)
+			//System.out.println(panel.state)
 		}
 	}
 	def getTotalCycleTime() : int
