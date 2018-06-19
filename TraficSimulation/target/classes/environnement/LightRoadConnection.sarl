@@ -14,6 +14,7 @@ import java.util.ArrayList
 class LightRoadConnection {
 	var point : RoadConnection
 	var timeCycle = 0
+	var trueTime = 0
 	var openTime : int
 	var secureTime : int
 	var cycle = 0
@@ -57,28 +58,28 @@ class LightRoadConnection {
 		this.lightPanelsPairs.add(newPairOfLightPanel)
 		return
 	}
-	def incrTimeCycle()
+	def incrTimeCycle(timeLoop : int) 
 	{
-		this.timeCycle++
-		if (totalCycleTime == this.timeCycle)
+		this.trueTime += timeLoop
+		if(trueTime >= 1000)
 		{
-			this.timeCycle = 0
-			this.cycle++
-			if (cycle > lightPanelsPairs.size())
-			{
-				this.cycle = 0
+			trueTime = 0
+			this.timeCycle++
+			if (totalCycleTime == this.timeCycle) {
+				this.timeCycle = 0
+				this.cycle++
+				if (cycle >= lightPanelsPairs.size()) {
+					this.cycle = 0
+				}
+				newCycle()
+			} else if (timeCycle == openTime) {
+				closeWays()
 			}
-			newCycle()
-		}
-		else if (timeCycle == openTime)
-		{
-			closeWays()
 		}
 	}
 	def closeWays()
 	{
-		for (panel : lightPanels)
-		{
+		for (panel : lightPanelsPairs.get(cycle)) {
 			panel.changeState
 		}
 	}
@@ -87,6 +88,7 @@ class LightRoadConnection {
 		for (panel : lightPanelsPairs.get(cycle))
 		{
 			panel.changeState
+			System.out.println(panel.state)
 		}
 	}
 	def getTotalCycleTime() : int

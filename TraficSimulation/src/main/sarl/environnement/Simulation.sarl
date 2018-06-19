@@ -33,6 +33,8 @@ import utils.ThreadComputer
 
 import static extension traficWindow.RoadRenderer.*
 import java.util.Collection
+import traficWindow.LightLayer
+import utils.Road
 
 /** 
  * @author Nicolas
@@ -51,29 +53,30 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap() 
-	var timeloop : int = 1000
-	var nbTimeSpaceInTimeLoop : int = 60
+	var timeloop : int = 150
+	var nbTimeSpaceInTimeLoop : int = 5
 	var timespace : int = timeloop / nbTimeSpaceInTimeLoop
 	var roadRenderer : RoadRenderer
 	var lightRoadConnections = new ArrayList<LightRoadConnection>()
 	
 	on Initialize { 
 		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
+		generateDefaultPanels()
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
+		RoadRenderer.lightLayer = new LightLayer(this.roadNetwork.lightPanel);
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
-		generateDefaultPanels()
-		
+
 		//ConfRenderer.render()
 
 		//roadRenderer.test();
-		var carModel1 = new CarModel(10, 20, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 300)
-		var carModel2 = new CarModel(10, 20, 5, 5, new Color(0.9, 0, 0, 0), "TEST2", 150)
+		var carModel1 = new CarModel(10, 80, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
+		var carModel2 = new CarModel(10, 60, 10, 10, new Color(0.9, 0, 0, 0), "TEST2", 150)
 		
 		addModel(carModel1)
 		addModel(carModel2)
-		this.desiredNbModel.put(carModel1.name, 0)
-		this.desiredNbModel.put(carModel2.name, 1)
+		this.desiredNbModel.put(carModel1.name, 3)
+		this.desiredNbModel.put(carModel2.name, 3)
 		wake(new BeginLoop)
 		
 	} 
@@ -85,7 +88,7 @@ agent Simulation{
 		computeNewCars()
 		this.carAtHome = new HashSet<UUID>()
 		this.influences = new ConcurrentHashMap<UUID, InfluenceAgent>()
-		// lightPanelProcess()
+		lightPanelProcess(timeloop)
 		//System.out.println("PROCESS PERCEPTIONS")
 		if(this.agents.size > 0)
 			computePerceptions()
@@ -207,21 +210,24 @@ agent Simulation{
 		this.lightRoadConnections.add(lightPoint)
 		for (segment : point.connectedSegments)
 		{
+			var endPoint : RoadConnection
 			if(point == segment.getEndPoint)
 			{
-				distance = (segment.getDistanceToEnd(0) - 10).floatValue
+				distance = (segment.length - 10).floatValue
+				endPoint = segment.getBeginPoint
 			}
 			else
 			{
 				distance = 10
+				endPoint = segment.getEndPoint
 			}
-			lightPoint.addLightPanel(this.roadNetwork.addLightPanel(distance, segment, point, false))
+			lightPoint.addLightPanel(this.roadNetwork.addLightPanel(distance, segment, endPoint, false))
 		}
 	}
-	def lightPanelProcess(){
+	def lightPanelProcess(time : int){
 		for (lightPoint : this.lightRoadConnections)
 		{
-			lightPoint.incrTimeCycle()
+			lightPoint.incrTimeCycle(time)
 		}
 	}
 	def chooseModelForNewAgent() : CarModel{
@@ -287,7 +293,7 @@ agent Simulation{
 		//System.out.println("NEW PERCEPT COMPUTATION")
 		var position = body.position
 		var viewDistance = body.model.viewDistance
-		var openList = new HashSet<RoadSegment>()
+		var openList = new ArrayList<Road>()
 		return exploreSegments(body.entryPoint, body.segment, viewDistance, position, body, openList)
 	}
 	def roadObjectToPercept(objs : HashSet<AbstractStaticObject>, position : float) : HashSet<Percept>
@@ -341,12 +347,12 @@ agent Simulation{
 	}
 
 	def exploreSegments(entryPoint : RoadConnection, segment : RoadSegment, distance : float, position : float,
-		body : AbstractStaticObject, openList : HashSet<RoadSegment>) : HashSet<Percept> {
+		body : AbstractStaticObject, openList : ArrayList<Road>) : HashSet<Percept> {
 		var bodyToEnd : float
 		var restDisView : float
 		var newPos : float = position
 		var percepts = new HashSet<Percept>
-		openList.add(segment) //Ajout du segment actuel à la liste ouverte des segments explorés
+		openList.add(new Road(entryPoint, segment)) // Ajout du segment actuel à la liste ouverte des segments explorés
 		
 		//Dans le cas où la voiture explore "virtuellement" le segment (à distance)
 		if (entryPoint == segment.beginPoint){
@@ -361,7 +367,6 @@ agent Simulation{
 			bodyToEnd = newPos
 		}
 
-		bodyToEnd = segment.length.floatValue - newPos
 		restDisView = distance - bodyToEnd
 		var visiblePercepts = new HashSet<AbstractStaticObject>
 		var tempsPercepts = new HashSet<AbstractStaticObject>
@@ -386,7 +391,7 @@ agent Simulation{
 		{
 			//Création d'une nouvelle variable contenant les éléments en vue
 			if(entryPoint == segment.beginPoint)
-			{
+			{ 
 				for (obj : tempsPercepts) {
 					if (segment.getDistanceFromStart(obj.position) <= distance)
 						visiblePercepts.add(obj)
@@ -399,8 +404,7 @@ agent Simulation{
 						visiblePercepts.add(obj)
 				}
 			}
-			percepts = roadObjectToPercept(visiblePercepts, newPos)
-			return percepts
+			return roadObjectToPercept(visiblePercepts, newPos)
 		}
 		//Si la voiture voit plus loin que la fin de la route
 		else
@@ -419,7 +423,7 @@ agent Simulation{
 				//Recherche dans les segments connectés qui n'ont pas déjà été explorés
 				for (var i = 0; i < nbConnectedSegments; i++) {
 					var newSegment = nextPoint.getConnectedSegment(i)
-					if (!(openList.contains(newSegment))){
+					if (!openList.contains(new Road(nextPoint, newSegment))) {
 						var newPercepts = exploreSegments(nextPoint, newSegment, restDisView, -1, body, openList)
 						newPercepts = setDistancePerceptsHashSet(newPercepts, bodyToEnd)
 						percepts.addAll(newPercepts)
@@ -428,7 +432,7 @@ agent Simulation{
 			}
 			return percepts
 		}
-	}
+	} 
 	def consumeInfluence()
 	{
 		for (conduc : this.agents) {
@@ -443,10 +447,11 @@ agent Simulation{
 		var roads = influence.roads
 		var acceleration = influence.acceleration
 		car.speed = car.speed + (acceleration / nbTimeSpaceInTimeLoop)
-		var distance = (car.speed * (this.timespace/1000.0)).floatValue
+		if(car.speed > car.maxSpeed)
+			car.speed = car.maxSpeed
+		var distance = (car.speed * (this.timespace / 1000.0)).floatValue
 		/*System.out.println("CAR : " + car)
 		System.out.println("DISTANCE : " + distance)
-		System.out.println("ROADS : " + roads.size())
 		System.out.println("SPEED : " + car.speed)*/
 		move(car, distance, roads)
 	}

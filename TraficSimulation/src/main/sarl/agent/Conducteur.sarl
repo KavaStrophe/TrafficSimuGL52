@@ -33,6 +33,7 @@ agent Conducteur {
 	
 	var percepts : HashSet<Percept>
 	var seeking = new BehaviorSeeking()
+	var arriving = new BehaviorArriving()
 	var following = new BehaviorFollowing()
 	var body : Car
 	
@@ -71,42 +72,89 @@ agent Conducteur {
 		else
 		{
 
-			var maxSpeedTemp : Percept = null
+			var maxSpeedTemp : Percept = null 
 			var obstacleTemp : Percept = null
-			var obstacleSpeed : float = 0
+			var obstacleSpeed : float = 0 
 			// On ne retient que les Percept sur notre chemin
+			//System.out.println("======================================")
 			for (percept : percepts) {
-				if (selectedPath.contains(percept.segment))
+
+					/*if (percept.type == "LIGHT")
+					{
+					System.out.println("TYPE OBJ : " + percept.type)
+					System.out.println("DIST OBJ : " + percept.distance)
+					System.out.println("IN PATH : " + selectedPath.contains(percept.segment))
+					System.out.println("IN SEGMENT : " + (percept.segment == body.segment))
+					}*/
+				if (selectedPath.contains(percept.segment) || (percept.segment == body.segment))
 				{
+					/*if (percept.type == "LIGHT")
+					{
+						System.out.println("ENTER CONDITION")
+						System.out.println("LIGH VALUE : " + percept.data)
+					}*/
 					if (percept.distance < 30 && percept.type == "SPEED") {
 						if (maxSpeedTemp == null || maxSpeedTemp.distance > percept.distance)
 							maxSpeedTemp = percept
 					}
 					else if (percept.type == "CAR") {
 						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
+						{
 							obstacleTemp = percept
 							obstacleSpeed = percept.data as Float
+						}
 					}
-					else if(percept.type == "LIGHT" && percept.data == false)
+					else if(percept.type == "LIGHT" && (percept.data == false))
 					{
-						obstacleTemp = percept
-						obstacleSpeed = 0
+						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
+						{
+							obstacleTemp = percept
+							obstacleSpeed = 0
+						}
 					}
 				}
 			}
+			//System.out.println("======================================")
+			
+			/*if(percepts.size > 0)
+			{
+				for(percept : percepts)
+				{
+					System.out.println("NEW PERCEPT -------------------------")
+					if(percept.type == "LIGHT")
+					{
+						System.out.println("TYPE : " + percept.type)
+						System.out.println("DISTANCE : " + percept.distance)
+						System.out.println("PRIS EN COMPTE : " + percept.type == "LIGHT" && percept.data == false)
+						if (obstacleTemp != null)
+							System.out.println("OBS DIST : " + obstacleTemp.distance)
+						else
+							System.out.println("PAS PRIS EN COMPTE !")
+						System.out.println(percept.segment.UUID)
+					}
+					System.out.println("END PERCEPT -------------------------")
+					
+				}
+			}*/
+
 			if (obstacleTemp != null)
 			{
-				System.out.println("============================================================")
-				System.out.println("TYPE OBS : " + obstacleTemp.type)
-				System.out.println("DISTANCE OBS : " + obstacleTemp.distance)
-				System.out.println("TAILE SEGMENT : " + this.body.segment.length)
-				System.out.println("BODY POSITION : " + this.body.position)
-				System.out.println(this.maxSpeed)
+				//System.out.println("============================================================")
+				//System.out.println("TYPE OBS : " + obstacleTemp.type)
+				//System.out.println("DISTANCE OBS : " + obstacleTemp.distance)
+				//System.out.println("TAILE SEGMENT : " + this.body.segment.length)
+				//System.out.println("BODY POSITION : " + this.body.position)
+				//System.out.println("TARGET SPEED : " + obstacleSpeed)
 				acc = this.following.run(this.body, obstacleTemp.distance, this.maxSpeed, obstacleSpeed)
-				System.out.println("ACCELERATION FINALE : " + acc)
+				//System.out.println("ACCELERATION FINALE : " + acc)
+				//System.out.println("============================================================")
+				
 			}
 			else
+			{
+				//System.out.println("SEEKING !")
 				acc = this.seeking.run(this.body, this.maxSpeed)
+			}
 		}
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
@@ -116,7 +164,7 @@ agent Conducteur {
 			if (this.body.position >= this.body.segment.length - 5 || this.body.position <= 5) {
 				if (this.body.entryPoint == this.body.segment.beginPoint &&
 					this.body.position >= this.body.segment.length - 5) {
-					return true
+					return true 
 				} else if (this.body.entryPoint == this.body.segment.endPoint && this.body.position <= 5) {
 					return true
 				}

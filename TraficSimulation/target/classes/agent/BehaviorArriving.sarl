@@ -1,0 +1,31 @@
+/** 
+ * 
+ */
+package ^agent
+
+import environnement.Car
+import utils.Converter
+import ^agent.BehaviorSeeking
+/** 
+ * @author Nicolas
+ * 
+ * Comportement que le conducteur adoptera lorsqu'une voiture se situera dans son champs de vision
+ */
+class BehaviorArriving {
+	val stopDistance : float = 10
+	def run(body : Car, distanceFromObject : float, maxSpeed : float) : float
+	{
+		var slowDownDistance = (Converter.convertMStoKM(body.speed) / 10) * 6
+		if (slowDownDistance < 10) 
+			slowDownDistance = 10
+		//System.out.println("SLOWDOWN DISTANCE: " + slowDownDistance) 
+		if (distanceFromObject > slowDownDistance)
+			return new BehaviorSeeking().run(body, maxSpeed)
+		else
+			computeIDM(body.speed, body.maxAcc, body.maxDesc, distanceFromObject, slowDownDistance, maxSpeed)
+	}
+	def computeIDM(speed : float, maxAcc : float, maxDesc : float, distanceFromObject : float, slowDownDistance : float, maxSpeed : float) : float
+	{
+		return -maxDesc
+	}
+}

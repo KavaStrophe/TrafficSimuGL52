@@ -87,6 +87,8 @@ abstract class AbstractStaticObject {
 	}
 	def getPosition2d() : Point2d
 	{ 
+		//if(this.segment.beginPoint == this.entryPoint)
+		//return this.segment.getGeoLocationForDistance(this.position, 5)
 		return this.segment.getGeoLocationForDistance(this.position)
 	}
 }

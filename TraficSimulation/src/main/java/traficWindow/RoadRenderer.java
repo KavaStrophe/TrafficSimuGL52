@@ -65,6 +65,7 @@ public class RoadRenderer extends Application {
 	private volatile MapElement selectedRoad;
 	public static MapElementLayer<?> roadLayer;
 	public static CarLayer carLayer; 
+	public static LightLayer lightLayer;
 	private GisPane scrollPane;
 
 	
@@ -104,6 +105,7 @@ public class RoadRenderer extends Application {
 	
 	public void update() {
 		carLayer.update();
+		lightLayer.update();
 		if(scrollPane != null) {
 			scrollPane.drawContent();
 		}
@@ -114,6 +116,7 @@ public class RoadRenderer extends Application {
 	public void start(Stage primaryStage) throws InterruptedException {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
+		layer.addMapLayer(this.lightLayer);
 		layer.addMapLayer(this.carLayer);
 
 	

@@ -3,7 +3,9 @@ package utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.arakhne.afc.gis.road.StandardRoadNetwork;
 import org.arakhne.afc.gis.road.primitive.RoadConnection;
@@ -50,27 +52,6 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 		for (RoadSegment segment : allSegments) {
 			allRoadConnections.add( segment.getBeginPoint());
 			allRoadConnections.add( segment.getEndPoint());
-			/*RoadConnection firstPoint = segment.getBeginPoint();
-			if (!impasses.contains(firstPoint) && !threeRoadConnections.contains(firstPoint) && !fourRoadConnections.contains(firstPoint)) {
-				if (firstPoint.isFinalConnectionPoint()) {
-					this.impasses.add(firstPoint);
-				} else if (firstPoint.getConnectedSegmentCount() == 3) {
-					this.threeRoadConnections.add(firstPoint);
-				} else if (firstPoint.getConnectedSegmentCount() == 4) {
-					this.fourRoadConnections.add(firstPoint);
-				}
-			}
-
-			RoadConnection lastPoint = segment.getEndPoint();
-			if (!impasses.contains(firstPoint) && !threeRoadConnections.contains(firstPoint) && !fourRoadConnections.contains(firstPoint)) {
-				if (lastPoint.isFinalConnectionPoint()) {
-					this.impasses.add(lastPoint);
-				} else if (lastPoint.getConnectedSegmentCount() == 3) {
-					this.threeRoadConnections.add(lastPoint);
-				} else if (lastPoint.getConnectedSegmentCount() == 3) {
-					this.fourRoadConnections.add(lastPoint);
-				}
-			}*/
 		}
 		for(RoadConnection point : allRoadConnections)
 		{

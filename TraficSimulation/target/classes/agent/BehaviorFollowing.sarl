@@ -4,6 +4,7 @@
 package ^agent
 
 import environnement.Car
+import utils.Converter
 
 /** 
  * @author Nicolas
@@ -27,12 +28,15 @@ class BehaviorFollowing {
 	) : float
 	{
 		var finalAcc : float;
-		
-		var safetyDistance = (currSpeed / 10) * 6
+		//System.out.println("Distance from obj : " + distanceFromObject)
+		//System.out.println("Current speed ms : " + currSpeed)
+		//System.out.println("Current speed km : " + Converter.convertMStoKM(currSpeed))
+		var safetyDistance = (Converter.convertMStoKM(currSpeed) / 10) * 6
 		//System.out.println("Safety Distance : " + safetyDistance)
-		var diffSpeed = speedObject - currSpeed
-		if (diffSpeed < 0)
-			diffSpeed = diffSpeed * -1
+		if (safetyDistance < 10)
+			safetyDistance = 10
+		//System.out.println("Safety Distance : " + safetyDistance)
+		var diffSpeed = currSpeed - speedObject
 		//System.out.println("Diff Vitesse : " + diffSpeed)
 		var timeBeforeCollision = distanceFromObject / idealSpeed
 		//System.out.println("timeBeforeCollision : " + timeBeforeCollision)
@@ -48,12 +52,16 @@ class BehaviorFollowing {
 		var secondPart = Math.pow(secondPart1 + secondPart2, 2)
 		//System.out.println("secondPart : " + secondPart)
 
-		finalAcc = (maxAccAgent * (1 - firstPart - secondPart)).floatValue
+		var precal = (1 - firstPart - secondPart)
+		if (precal > 0)
+			finalAcc = (maxAccAgent * precal).floatValue
+		else
+			finalAcc = (maxDesAgent * precal).floatValue
 		//System.out.println("finalSpep : " + finalAcc
-		/*if (finalAcc < -1 * maxDesAgent)
-			finalAcc = maxDesAgent
+		if (finalAcc < -maxDesAgent)
+			finalAcc = -maxDesAgent
 		if (finalAcc > maxAccAgent)
-			finalAcc = maxAccAgent*/
+			finalAcc = maxAccAgent
 		return finalAcc.floatValue
 	}
 	
