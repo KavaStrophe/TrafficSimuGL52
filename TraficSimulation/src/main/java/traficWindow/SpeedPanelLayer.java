@@ -8,10 +8,9 @@ import org.arakhne.afc.gis.mapelement.MapElement;
 import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 
 
-import environnement.Car;
-import environnement.LightPanel;
+
 import environnement.SpeedPanel;
-import javafx.scene.paint.Color;
+
 
 
 public class SpeedPanelLayer extends ArrayMapElementLayer<MapElement>

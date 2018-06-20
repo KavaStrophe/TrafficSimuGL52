@@ -36,6 +36,7 @@ import java.util.Collection
 import traficWindow.LightLayer
 import utils.Road
 import traficWindow.SpeedPanelLayer
+import traficWindow.StopPanelLayer
 
 /** 
  * @author Nicolas
@@ -67,6 +68,7 @@ agent Simulation{
 		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
 		RoadRenderer.lightLayer = new LightLayer(this.roadNetwork.lightPanel);
 		RoadRenderer.speedPanelLayer = new SpeedPanelLayer(this.roadNetwork.speedPanel);
+		RoadRenderer.stopPanelLayer = new StopPanelLayer(this.roadNetwork.stopPanel);
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 
 		//ConfRenderer.render()

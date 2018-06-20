@@ -67,6 +67,7 @@ public class RoadRenderer extends Application {
 	public static CarLayer carLayer; 
 	public static LightLayer lightLayer;
 	public static SpeedPanelLayer speedPanelLayer;
+	public static StopPanelLayer stopPanelLayer;
 	private GisPane scrollPane;
 
 	
@@ -108,6 +109,7 @@ public class RoadRenderer extends Application {
 		carLayer.update();
 		lightLayer.update();
 		speedPanelLayer.update();
+		stopPanelLayer.update();
 		if(scrollPane != null) {
 			scrollPane.drawContent();
 		}
