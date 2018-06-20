@@ -66,6 +66,7 @@ public class RoadRenderer extends Application {
 	public static MapElementLayer<?> roadLayer;
 	public static CarLayer carLayer; 
 	public static LightLayer lightLayer;
+	public static SpeedPanelLayer speedPanelLayer;
 	private GisPane scrollPane;
 
 	
@@ -106,6 +107,7 @@ public class RoadRenderer extends Application {
 	public void update() {
 		carLayer.update();
 		lightLayer.update();
+		speedPanelLayer.update();
 		if(scrollPane != null) {
 			scrollPane.drawContent();
 		}
