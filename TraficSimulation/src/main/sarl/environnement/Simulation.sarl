@@ -33,6 +33,7 @@ import utils.Loader
 import utils.ThreadComputer
 
 import static traficWindow.RoadRenderer.*
+import configurationwindow.LaunchWindow
 
 /** 
  * @author Nulboroth
@@ -59,6 +60,11 @@ agent Simulation{
 	var typeSpeedPanel = new ArrayList<Integer>()
 	
 	on Initialize {
+
+		var launchWindow = new LaunchWindow();
+		launchWindow.run();
+		
+		
 		typeSpeedPanel.add(30)
 		typeSpeedPanel.add(50)
 		typeSpeedPanel.add(70)
