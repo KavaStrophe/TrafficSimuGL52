@@ -66,7 +66,8 @@ public class RoadRenderer extends Application {
 	public static MapElementLayer<?> roadLayer;
 	public static CarLayer carLayer; 
 	public static LightLayer lightLayer;
-	public static StopLayer stopLayer;
+	public static SpeedPanelLayer speedPanelLayer;
+	public static StopPanelLayer stopPanelLayer;
 	private GisPane scrollPane;
 
 	
@@ -107,6 +108,8 @@ public class RoadRenderer extends Application {
 	public void update() {
 		carLayer.update();
 		lightLayer.update();
+		speedPanelLayer.update();
+		stopPanelLayer.update();
 		if(scrollPane != null) {
 			scrollPane.drawContent();
 		}
@@ -118,7 +121,6 @@ public class RoadRenderer extends Application {
 		final MultiMapLayer layer = new MultiMapLayer<>();
 		layer.addMapLayer(this.roadLayer);
 		layer.addMapLayer(this.lightLayer);
-		layer.addMapLayer(this.stopLayer);
 		layer.addMapLayer(this.carLayer);
 
 	

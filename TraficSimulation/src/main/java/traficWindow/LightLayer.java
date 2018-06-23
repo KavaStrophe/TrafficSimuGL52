@@ -8,9 +8,9 @@ import org.arakhne.afc.gis.mapelement.MapElement;
 import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 
 
-import environnement.Car;
+
 import environnement.LightPanel;
-import javafx.scene.paint.Color;
+
 
 
 public class LightLayer extends ArrayMapElementLayer<MapElement>
