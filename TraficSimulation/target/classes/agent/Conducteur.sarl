@@ -21,6 +21,8 @@ import events.AreYouAtHome
 import events.IamAtHome
 import java.util.HashSet
 import environnement.Percept
+import utils.Converter
+import org.arakhne.afc.gis.road.primitive.RoadConnection
 
 /** 
  * @author Nicolas
@@ -60,8 +62,6 @@ agent Conducteur {
 	
 	def computeInfluence()
 	{
-		/*System.out.println(this.body.speed)
-		System.out.println(this.maxSpeed)*/
 		var selectedPath = this.body.gps 
 		var acc : float
 		if(amIAtHome) 
@@ -74,25 +74,15 @@ agent Conducteur {
 
 			var maxSpeedTemp : Percept = null 
 			var obstacleTemp : Percept = null
-			var obstacleSpeed : float = 0 
-			// On ne retient que les Percept sur notre chemin
-			//System.out.println("======================================")
+			var safetyDistance = (Converter.convertMStoKM(body.speed) / 10) * 6
+			if (safetyDistance < 10)
+				safetyDistance = 10
+			
+			//On cherche l'obstacle le plus proche
 			for (percept : percepts) {
-
-					/*if (percept.type == "LIGHT")
-					{
-					System.out.println("TYPE OBJ : " + percept.type)
-					System.out.println("DIST OBJ : " + percept.distance)
-					System.out.println("IN PATH : " + selectedPath.contains(percept.segment))
-					System.out.println("IN SEGMENT : " + (percept.segment == body.segment))
-					}*/
+				// On ne retient que les Percept sur notre chemin
 				if (selectedPath.contains(percept.segment) || (percept.segment == body.segment))
 				{
-					/*if (percept.type == "LIGHT")
-					{
-						System.out.println("ENTER CONDITION")
-						System.out.println("LIGH VALUE : " + percept.data)
-					}*/
 					if (percept.distance < 30 && percept.type == "SPEED") {
 						if (maxSpeedTemp == null || maxSpeedTemp.distance > percept.distance)
 							maxSpeedTemp = percept
@@ -101,62 +91,90 @@ agent Conducteur {
 						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
 						{
 							obstacleTemp = percept
-							obstacleSpeed = percept.data as Float
 						}
 					}
-					else if(percept.type == "LIGHT" && (percept.data == false))
+					else if ((percept.type == "LIGHT" && (percept.data == false)) || percept.type == "STOP")
 					{
 						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
 						{
 							obstacleTemp = percept
-							obstacleSpeed = 0
 						}
 					}
 				}
-			}
-			//System.out.println("======================================")
-			
-			/*if(percepts.size > 0)
-			{
-				for(percept : percepts)
-				{
-					System.out.println("NEW PERCEPT -------------------------")
-					if(percept.type == "LIGHT")
-					{
-						System.out.println("TYPE : " + percept.type)
-						System.out.println("DISTANCE : " + percept.distance)
-						System.out.println("PRIS EN COMPTE : " + percept.type == "LIGHT" && percept.data == false)
-						if (obstacleTemp != null)
-							System.out.println("OBS DIST : " + obstacleTemp.distance)
-						else
-							System.out.println("PAS PRIS EN COMPTE !")
-						System.out.println(percept.segment.UUID)
-					}
-					System.out.println("END PERCEPT -------------------------")
-					
-				}
-			}*/
+			} 
 
+			// Dans le cas où un obstacle se situe devant le véhicule
+			System.out.println("============================================================")
+			
+			
 			if (obstacleTemp != null)
 			{
-				//System.out.println("============================================================")
-				//System.out.println("TYPE OBS : " + obstacleTemp.type)
-				//System.out.println("DISTANCE OBS : " + obstacleTemp.distance)
-				//System.out.println("TAILE SEGMENT : " + this.body.segment.length)
-				//System.out.println("BODY POSITION : " + this.body.position)
-				//System.out.println("TARGET SPEED : " + obstacleSpeed)
-				acc = this.following.run(this.body, obstacleTemp.distance, this.maxSpeed, obstacleSpeed)
-				//System.out.println("ACCELERATION FINALE : " + acc)
-				//System.out.println("============================================================")
+				System.out.println("TYPE OBS : " + obstacleTemp.type)
+				System.out.println("DISTANCE OBS : " + obstacleTemp.distance)
+				System.out.println("TAILE SEGMENT : " + this.body.segment.length)
+				System.out.println("BODY POSITION : " + this.body.position)
+				System.out.println("BODY SPEED : " + this.body.speed)
+				System.out.println("TARGET SPEED : " + obstacleTemp.speed)
+				System.out.println("ACCELERATION FINALE : " + acc)
+				//Si l'obstacle, qui n'est pas une voiture, est encore assez éloigné
+				if (safetyDistance > obstacleTemp.distance + 10 && obstacleTemp != "CAR")
+				{
+					acc = this.seeking.run(body, maxSpeed)
+					System.out.println("TYPE :  SEEKING")
+				}
+				//Si l'obstacle est arrêté (ex : Panneaux)
+				else if (obstacleTemp.speed == 0)
+				{
+					//Dans le cas où le panneau STOP a été respecté, ne plus en tenir compte
+					if (obstacleTemp.type == "STOP" && (this.body.speed < 0.5 || obstacleTemp.distance < 10) &&
+						checkFreeRoad()) {
+						this.percepts.remove(obstacleTemp)
+						computeInfluence()
+						return
+					}
+					//Sinon, ralentir à son approche
+					System.out.println("TYPE :  ARRIVING")
+					acc = this.arriving.run(this.body, obstacleTemp.distance, this.maxSpeed)
+					
+				}
+				//Sinon (en général dans le cas des voitures)
+				else
+				{
+					acc = this.following.run(this.body, obstacleTemp.distance, this.maxSpeed, obstacleTemp.speed)
+					System.out.println("TYPE :  FOLLOWING")
+				}
 				
 			}
+			//Dans le cas où il n'y a aucun obstacle
 			else
 			{
-				//System.out.println("SEEKING !")
 				acc = this.seeking.run(this.body, this.maxSpeed)
+				System.out.println("TYPE :  SEEKING")
+				
 			}
 		}
+		System.out.println("============================================================")
+		
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
+	}
+
+	def checkFreeRoad : boolean {
+		var checkConfirm = true
+		var endPoint : RoadConnection
+		if(this.body.entryPoint == this.body.segment.beginPoint)
+			endPoint = this.body.segment.endPoint
+		else 
+			endPoint = this.body.segment.beginPoint
+			
+		for(percept : this.percepts)
+		{
+			if (percept.speed < this.body.speed && percept.segment != this.body.segment && percept.distance < 30 && percept.entryPoint != endPoint && percept.type == "CAR")
+			{ 
+				checkConfirm = false
+			}
+		}
+		
+		return checkConfirm
 	}
 
 	def amIAtHome : boolean {

@@ -79,17 +79,53 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 	}
 	
 	public void addStopPanelOnThisRoadConnection(RoadConnection point) {
-		int randomNumSegment = (int) Math.round(Math.random() * 2);
-		RoadSegment segment = point.getConnectedSegment(randomNumSegment);
+		int randomNumSegment = 0;// (int) Math.round(Math.random() * 2);
+		RoadSegment segmentFinal = point.getConnectedSegment(0);
+		RoadConnection endPoint;
 		float distance = 10;
-		if (point == segment.getEndPoint()) {
-			distance = (float) (segment.getDistanceToEnd(0) - 10);
-		} 
-		addStopPanel(distance, segment, point);
+		Iterable<RoadSegment> segments = point.getConnectedSegments();
+		for(RoadSegment segment : segments)
+		{
+			RoadConnection tempPoint;
+			if(segment.getEndPoint() == point)
+			{
+				tempPoint = segment.getBeginPoint();
+			}
+			else
+			{
+				tempPoint = segmentFinal.getEndPoint();
+			}
+			
+			if(tempPoint.getConnectedSegmentCount() == 1)
+			{
+				segmentFinal = segment;
+				break;
+			}
+			else
+			{
+				if(segmentFinal.getLength() < segment.getLength())
+				{
+					segmentFinal = segment;
+				}
+			}
+		}
+		
+
+		if(segmentFinal.getEndPoint() == point)
+		{
+			endPoint = segmentFinal.getBeginPoint();
+		}
+		else
+		{
+			endPoint = segmentFinal.getEndPoint();
+			distance = (float) (segmentFinal.getLength() - 10);
+		}
+		addStopPanel(distance, segmentFinal, endPoint);
 	}
 	public StopPanel addStopPanel(float position, RoadSegment segment, RoadConnection entryPoint)
 	{
 		UUID id = UUID.randomUUID();
+			
 		StopPanel panel = new StopPanel(id, entryPoint, segment, position);
 		this.stopPanel.add(panel);
 		addObjectToThisSegment("PANEL", panel, segment);
@@ -114,8 +150,6 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 		segment.addUserData(type, obj);
 	}
 	public void removeObjectFromHisSegment(String type, AbstractStaticObject obj) {
-		//System.out.println("OBJ : " + obj);
-		//System.out.println("COLLECT : " + obj.getSegment().getUserDataCollection(type));
 		obj.getSegment().removeUserData(type, obj);
 
 	}

@@ -14,7 +14,12 @@ import utils.Converter
 class BehaviorFollowing {
 	def run(body : Car, distanceFromObject : float, maxSpeed : float, speedObject : float) : float
 	{
-		return computeIDM(body.maxAcc, body.minAcc, distanceFromObject, body.speed, maxSpeed, speedObject)
+		var safetyDistance = (Converter.convertMStoKM(body.speed) / 10) * 6
+		if (safetyDistance < 15)
+			safetyDistance = 15
+			
+		return computeIDM(body.maxAcc, body.minAcc, distanceFromObject, body.speed, maxSpeed, speedObject,
+			safetyDistance)
 	
 	}
 	
@@ -24,17 +29,15 @@ class BehaviorFollowing {
 		distanceFromObject : float, //the distance to the ahead object
 		currSpeed : float,
 		idealSpeed : float,
-		speedObject : float
+		speedObject : float,
+		safetyDistance : float
 	) : float
 	{
 		var finalAcc : float;
 		//System.out.println("Distance from obj : " + distanceFromObject)
 		//System.out.println("Current speed ms : " + currSpeed)
 		//System.out.println("Current speed km : " + Converter.convertMStoKM(currSpeed))
-		var safetyDistance = (Converter.convertMStoKM(currSpeed) / 10) * 6
 		//System.out.println("Safety Distance : " + safetyDistance)
-		if (safetyDistance < 10)
-			safetyDistance = 10
 		//System.out.println("Safety Distance : " + safetyDistance)
 		var diffSpeed = currSpeed - speedObject
 		//System.out.println("Diff Vitesse : " + diffSpeed)

@@ -85,10 +85,12 @@ abstract class AbstractStaticObject {
 	def getEntryPoint() : RoadConnection {
 		return this.entryPoint
 	}
-	def getPosition2d() : Point2d
-	{ 
-		//if(this.segment.beginPoint == this.entryPoint)
-		//return this.segment.getGeoLocationForDistance(this.position, 5)
+
+	def getPosition2d() : Point2d {
 		return this.segment.getGeoLocationForDistance(this.position)
+	}
+	def getPosition2d(shift : double) : Point2d
+	{ 
+		return this.segment.getGeoLocationForDistance(this.position, shift)
 	}
 }

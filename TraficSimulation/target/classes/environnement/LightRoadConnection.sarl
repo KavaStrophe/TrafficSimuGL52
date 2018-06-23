@@ -23,7 +23,7 @@ class LightRoadConnection {
 
 	new (point : RoadConnection)  {
 		this.point = point
-		this.openTime = 10
+		this.openTime = 5 
 		this.secureTime = 3
 	}
 	new (point : RoadConnection, openTime : int, secureTime : int){
@@ -80,15 +80,14 @@ class LightRoadConnection {
 	def closeWays()
 	{
 		for (panel : lightPanelsPairs.get(cycle)) {
-			panel.changeState
+			panel.state = false
 		}
 	}
 	def newCycle()
 	{
 		for (panel : lightPanelsPairs.get(cycle))
 		{
-			panel.changeState
-			//System.out.println(panel.state)
+			panel.state = true
 		}
 	}
 	def getTotalCycleTime() : int

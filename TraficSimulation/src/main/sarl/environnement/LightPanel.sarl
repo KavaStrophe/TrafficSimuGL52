@@ -29,7 +29,7 @@ class LightPanel extends AbstractPanel{
 	def changeState()
 	{
 		this.state = !this.state
-		if(!this.state)
+		if(!this.state) 
 			this.length = 10
 		else
 			this.length = 0
@@ -37,5 +37,9 @@ class LightPanel extends AbstractPanel{
 	def getState()
 	{
 		return this.state
+	}
+	def setState(state : boolean)
+	{
+		this.state = state
 	}
 }

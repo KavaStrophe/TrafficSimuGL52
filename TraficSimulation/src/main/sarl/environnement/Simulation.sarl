@@ -35,6 +35,7 @@ import static extension traficWindow.RoadRenderer.*
 import java.util.Collection
 import traficWindow.LightLayer
 import utils.Road
+import traficWindow.StopLayer
 
 /** 
  * @author Nicolas
@@ -53,7 +54,7 @@ agent Simulation{
 	var desiredNbModel : HashMap<String, Integer> = new HashMap()
 	var actualNbModel : HashMap<String, Integer> = new HashMap()
 	var definedModels : HashMap<String, CarModel> = new HashMap() 
-	var timeloop : int = 150
+	var timeloop : int = 200
 	var nbTimeSpaceInTimeLoop : int = 5
 	var timespace : int = timeloop / nbTimeSpaceInTimeLoop
 	var roadRenderer : RoadRenderer
@@ -65,18 +66,19 @@ agent Simulation{
 		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
 		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
 		RoadRenderer.lightLayer = new LightLayer(this.roadNetwork.lightPanel);
+		RoadRenderer.stopLayer = new StopLayer(this.roadNetwork.stopPanel);
 		this.roadRenderer = ThreadComputer.startRoadRenderer()
 
 		//ConfRenderer.render()
 
 		//roadRenderer.test();
-		var carModel1 = new CarModel(10, 80, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
-		var carModel2 = new CarModel(10, 60, 10, 10, new Color(0.9, 0, 0, 0), "TEST2", 150)
+		var carModel1 = new CarModel(10, 80, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 100)
+		var carModel2 = new CarModel(10, 60, 10, 10, new Color(0.9, 0, 0, 0), "TEST2", 100)
 		
-		addModel(carModel1)
+		addModel(carModel1) 
 		addModel(carModel2)
 		this.desiredNbModel.put(carModel1.name, 3)
-		this.desiredNbModel.put(carModel2.name, 3)
+		this.desiredNbModel.put(carModel2.name, 0)
 		wake(new BeginLoop)
 		
 	} 
@@ -213,12 +215,12 @@ agent Simulation{
 			var endPoint : RoadConnection
 			if(point == segment.getEndPoint)
 			{
-				distance = (segment.length - 10).floatValue
+				distance = (segment.length - 5).floatValue
 				endPoint = segment.getBeginPoint
 			}
 			else
 			{
-				distance = 10
+				distance = 5
 				endPoint = segment.getEndPoint
 			}
 			lightPoint.addLightPanel(this.roadNetwork.addLightPanel(distance, segment, endPoint, false))
@@ -313,18 +315,23 @@ agent Simulation{
 			
 			if (obj instanceof StopPanel) {
 				type = "STOP"
+				data = null
+				speed = 0
 			}
 			else if (obj instanceof LightPanel) {
 				type = "LIGHT"
 				data = obj.state
+				speed = 0
 			} else if (obj instanceof SpeedPanel) {
 				type = "SPEEDPANEL"
 				data = obj.speed
+				speed = 0
 			} else if (obj instanceof Car) {
 				type = "CAR"
-				data = obj.speed
+				data = null
+				speed = obj.speed
 			}		
-			percepts.add(new Percept(type, distanceBetween, obj.segment, obj.entryPoint, data))
+			percepts.add(new Percept(type, distanceBetween, obj.segment, obj.entryPoint, data, speed))
 				
 		}
 
@@ -340,7 +347,8 @@ agent Simulation{
 				percept.distance + distance,
 				percept.segment, 
 				percept.entryPoint,
-				percept.data
+				percept.data,
+				percept.speed
 			)) 
 		}
 		return newPercepts
@@ -382,7 +390,11 @@ agent Simulation{
 		for (percept : unClassedPercepts)
 		{
 			if (percept.entryPoint == entryPoint && percept != body)
-				tempsPercepts.add(percept)
+				if(entryPoint == segment.beginPoint && body.position <= percept.position)
+					tempsPercepts.add(percept)
+				else if (entryPoint == segment.endPoint && body.position >= percept.position)
+					tempsPercepts.add(percept)
+				
 		}
 
 		
@@ -423,7 +435,7 @@ agent Simulation{
 				//Recherche dans les segments connectés qui n'ont pas déjà été explorés
 				for (var i = 0; i < nbConnectedSegments; i++) {
 					var newSegment = nextPoint.getConnectedSegment(i)
-					if (!openList.contains(new Road(nextPoint, newSegment))) {
+					if (!openList.contains(new Road(nextPoint, newSegment)) && newSegment != segment && newSegment != body.segment) {
 						var newPercepts = exploreSegments(nextPoint, newSegment, restDisView, -1, body, openList)
 						newPercepts = setDistancePerceptsHashSet(newPercepts, bodyToEnd)
 						percepts.addAll(newPercepts)
@@ -449,6 +461,8 @@ agent Simulation{
 		car.speed = car.speed + (acceleration / nbTimeSpaceInTimeLoop)
 		if(car.speed > car.maxSpeed)
 			car.speed = car.maxSpeed
+		if (car.speed < -car.maxSpeed)
+			car.speed = 0
 		var distance = (car.speed * (this.timespace / 1000.0)).floatValue
 		/*System.out.println("CAR : " + car)
 		System.out.println("DISTANCE : " + distance)

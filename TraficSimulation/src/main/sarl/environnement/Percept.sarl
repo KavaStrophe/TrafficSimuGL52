@@ -10,13 +10,15 @@ class Percept {
 	var distance : float
 	var segment : RoadSegment
 	var entryPoint : RoadConnection
+	var speed : float
 	
-	new(type : String, distance : float, segment : RoadSegment, entryPoint : RoadConnection, data : Object)
+	new(type : String, distance : float, segment : RoadSegment, entryPoint : RoadConnection, data : Object, speed : float)
 	{
 		this.type = type
 		this.data = data
 		this.distance = distance
 		this.segment = segment
+		this.speed = speed
 	}
 	def getType : String 
 	{
@@ -25,6 +27,10 @@ class Percept {
  
 	def getData : Object {
 		return this.data
+	}
+
+	def getSpeed : float{
+		return this.speed
 	}
 
 	def getDistance : float {

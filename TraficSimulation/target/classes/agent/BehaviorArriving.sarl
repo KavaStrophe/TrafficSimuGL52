@@ -13,16 +13,17 @@ import ^agent.BehaviorSeeking
  */
 class BehaviorArriving {
 	val stopDistance : float = 10
-	def run(body : Car, distanceFromObject : float, maxSpeed : float) : float
+	def run(body : Car, distanceFromObject : float , maxSpeed : float) : float
 	{
-		var slowDownDistance = (Converter.convertMStoKM(body.speed) / 10) * 6
-		if (slowDownDistance < 10) 
-			slowDownDistance = 10
-		//System.out.println("SLOWDOWN DISTANCE: " + slowDownDistance) 
+		var slowDownDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6)
+		if (slowDownDistance < 20) 
+			slowDownDistance = 20  
 		if (distanceFromObject > slowDownDistance)
-			return new BehaviorSeeking().run(body, maxSpeed)
+			return new BehaviorSeeking().run(body, maxSpeed) 
 		else
-			computeIDM(body.speed, body.maxAcc, body.maxDesc, distanceFromObject, slowDownDistance, maxSpeed)
+			return (new BehaviorFollowing()).computeIDM(body.maxAcc, body.maxDesc, distanceFromObject, body.speed,
+				 maxSpeed, 0, slowDownDistance) 
+			//computeIDM(body.speed, body.maxAcc, body.maxDesc, distanceFromObject, slowDownDistance, maxSpeed)
 	}
 	def computeIDM(speed : float, maxAcc : float, maxDesc : float, distanceFromObject : float, slowDownDistance : float, maxSpeed : float) : float
 	{

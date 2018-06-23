@@ -45,7 +45,6 @@ public class CarLayer extends ArrayMapElementLayer<MapElement>
 		for(Car c : carList) {
 			
 			// TODO : check filters
-			
 			MapCircle mapCircle = new MapCircle(c.getPosition2d(), CAR_RADIUS);
 			Color carColor = c.getColor();
 			mapCircle.setColor(getIntFromColor(carColor.getRed(), carColor.getGreen(), carColor.getBlue()));
