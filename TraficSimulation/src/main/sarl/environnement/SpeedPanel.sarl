@@ -1,5 +1,5 @@
 /** 
- * Tous les panneaux
+ * Panneaux de limitation de vitesse
  */
 package environnement
 
@@ -8,19 +8,19 @@ import java.util.UUID
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import utils.Converter
 
-/** 
- * @author Nicolas
+/**  
+ * @author Nulboroth
  * 
  */
-class SpeedPanel extends AbstractPanel{
+class SpeedPanel extends AbstractPanel{ 
 	var speed : int
 	var speedInMS : float
 
 	new (id : UUID, point : RoadConnection, segment : RoadSegment, position : float, speed : int)  
 	{
 		super(id, point, segment, position, 0)
-		this.speed = speed
-		this.speedInMS = Converter.convertKHtoMS(speed) 
+		this.speed = speed //Limite de vitesse en km/h
+		this.speedInMS = Converter.convertKHtoMS(speed) //Limite de vitesse en m/s
 	}
 	
 	def getSpeed () : float

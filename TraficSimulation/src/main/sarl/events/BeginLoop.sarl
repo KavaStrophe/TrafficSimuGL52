@@ -1,10 +1,10 @@
 /** 
- * Evènement de début de boucle
+ * Evènement de début de boucle de la simulation
  */
 package events
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 event BeginLoop

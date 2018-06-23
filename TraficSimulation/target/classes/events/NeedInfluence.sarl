@@ -1,15 +1,14 @@
 /** 
- * 
+ * L'environnement envoie leurs perceptions aux agents et attend leur influence
  */
 package events
 
-import environnement.AbstractStaticObject
 import environnement.Car
-import java.util.HashSet
 import environnement.Percept
+import java.util.HashSet
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 event NeedInfluence

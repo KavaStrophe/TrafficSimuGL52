@@ -7,26 +7,44 @@ import environnement.Car
 import utils.Converter
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  * Comportement que le conducteur adoptera lorsqu'une voiture se situera dans son champs de vision
  */
 class BehaviorFollowing {
+	/**
+	 * @param body Corps de l'agent
+	 * @param distanceFromObject Distance séparant l'agent de l'obstacle
+	 * @param maxSpeed Vitesse maximal atteignable par l'agent
+	 * @param speedObject Vitesse de l'obstacle
+	 * @return Nouvelle acceleration de l'agent
+	 */
 	def run(body : Car, distanceFromObject : float, maxSpeed : float, speedObject : float) : float
 	{
-		var safetyDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6) + 10
-		if (safetyDistance < 10)
-			safetyDistance = 10
+		var safetyDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6) + 15 //Calcul de la distance minimale de sécurité + écart minimum entre deux voitures à l'arrêt
 			
 		return computeIDM(body.maxAcc, body.minAcc, distanceFromObject, body.speed, maxSpeed, speedObject,
 			safetyDistance)
 	
 	}
-	
+
+	/**
+	 * Fonction se basant sur l'IDM (Intelligent Driver Model) afin de calculer l'accélération à adopter à l'approche d'un obstacle mouvant
+	 * 
+	 * @param maxAccAgent Acceleration maximale de l'agent
+	 * @param maxDesAgent Desceleration maximale de l'agent
+	 * @param distanceFromObject Distance séparant l'agent de l'obstacle
+	 * @param currSpeed Vitesse actuelle de l'agent
+	 * @param idealSpeed Vitesse maximale atteignable par l'agent
+	 * @param speedObject Vitesse de l'obstacle
+	 * @param safetyDistance Distance minimale à conserver entre les deux objets
+	 * 
+	 * @return Nouvelle acceleration de l'agent
+	 */
 	def computeIDM(
-		maxAccAgent : float, //the maximal acceleration
-		maxDesAgent : float, //the comfortable braking deceleration
-		distanceFromObject : float, //the distance to the ahead object
+		maxAccAgent : float, 
+		maxDesAgent : float, 
+		distanceFromObject : float,
 		currSpeed : float,
 		idealSpeed : float,
 		speedObject : float,
@@ -35,7 +53,7 @@ class BehaviorFollowing {
 	{
 		var finalAcc : float;
 		var diffSpeed = currSpeed - speedObject
-		var timeBeforeCollision = distanceFromObject / idealSpeed
+		var timeBeforeCollision = distanceFromObject / idealSpeed //Calcul du temps restant avant la collision
 		
 		var firstPart = Math.pow(currSpeed/idealSpeed, 4)
 		
@@ -47,15 +65,15 @@ class BehaviorFollowing {
 		var precal = (1 - firstPart - secondPart)
 		
 		if (precal > 0)
-			finalAcc = (maxAccAgent * precal).floatValue
+			finalAcc = (maxAccAgent * precal).floatValue()
 		else
-			finalAcc = (maxDesAgent * precal).floatValue
+			finalAcc = (maxDesAgent * precal).floatValue()
 
 		if (finalAcc < -maxDesAgent)
 			finalAcc = -maxDesAgent
 		if (finalAcc > maxAccAgent)
 			finalAcc = maxAccAgent
-		return finalAcc.floatValue
+		return finalAcc.floatValue() 
 	}
 	
 }

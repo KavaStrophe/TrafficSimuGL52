@@ -1,25 +1,24 @@
 /** 
- * Tous les panneaux
+ * Gestionnaire des feux de signalisation sur une RoadConnection
  */
 package environnement
 
-import org.arakhne.afc.gis.road.primitive.RoadConnection
-import java.util.UUID
 import java.util.ArrayList
+import org.arakhne.afc.gis.road.primitive.RoadConnection
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 class LightRoadConnection {
-	var point : RoadConnection
-	var timeCycle = 0
-	var trueTime = 0
-	var openTime : int
-	var secureTime : int
-	var cycle = 0
-	var lightPanelsPairs = new ArrayList<ArrayList<LightPanel>>()
-	var lightPanels = new ArrayList<LightPanel>()
+	var point : RoadConnection //Point supervisé
+	var timeCycle = 0 //Numéro du cycle actuel
+	var trueTime = 0 // Temps en millisecondes passé depuis l'initialisation du nouveau cycle
+	var openTime : int // Temps en secondes de durée des feux verts
+	var secureTime : int // Temps en secondes de durée de la phase de tous les feux à rouge
+	var cycle = 0 //Cycle actuel
+	var lightPanelsPairs = new ArrayList<ArrayList<LightPanel>>() //Liste de paires de panneaux : une paire = un cycle. A chaque cycle une paire de feux sera vert
+	var lightPanels = new ArrayList<LightPanel>() //Liste de tous les feux de la connection
 
 	new (point : RoadConnection)  {
 		this.point = point
@@ -35,14 +34,14 @@ class LightRoadConnection {
 	def getPoint() : RoadConnection{
 		return this.point
 	}
-	def addLightPanel(panels : ArrayList<LightPanel>)
+	def addLightPanel(panels : ArrayList<LightPanel>) : void
 	{ 
 		for(panel : panels)
 		{
 			addLightPanel(panel)
 		}
 	}
-	def addLightPanel(panel : LightPanel)
+	def addLightPanel(panel : LightPanel) : void
 	{
 		this.lightPanels.add(panel)
 		for (pairPanel : this.lightPanelsPairs)
@@ -58,32 +57,42 @@ class LightRoadConnection {
 		this.lightPanelsPairs.add(newPairOfLightPanel)
 		return
 	}
-	def incrTimeCycle(timeLoop : int) 
+	/**
+	 * Incrémente le temps passé
+	 * @param timeLoop Temps de la boucle de la Simulation
+	 */
+	def incrTimeCycle(timeLoop : int) : void
 	{
 		this.trueTime += timeLoop
-		if(trueTime >= 1000)
+		if(trueTime >= 1000) //A chaque seconde qui passe
 		{
 			trueTime = 0
-			this.timeCycle++
-			if (totalCycleTime == this.timeCycle) {
+			this.timeCycle++ //On incrémente d'une seconde le temps passé
+			if (totalCycleTime == this.timeCycle) { //Quand le temps passé correspond à celui d'un cycle entier
 				this.timeCycle = 0
 				this.cycle++
-				if (cycle >= lightPanelsPairs.size()) {
+				if (cycle >= lightPanelsPairs.size()) { //Retour à la première paire de panneaux si la dernière est atteinte et terminée
 					this.cycle = 0
 				}
-				newCycle()
-			} else if (timeCycle == openTime) {
+				newCycle() //Création d'un nouveau cycle
+			} else if (timeCycle == openTime) { //Si le temps passé correspond à celui de l'Opentime, on passe au closeTime
 				closeWays()
 			}
 		}
 	}
-	def closeWays()
+	/**
+	 * Tous les feux de la connection passent au rouge
+	 */
+	def closeWays() : void
 	{
 		for (panel : lightPanelsPairs.get(cycle)) {
 			panel.state = false
 		}
 	}
-	def newCycle()
+	/**
+	 * Tous les feux de la paire actuelle passent au vert
+	 */
+	def newCycle() : void
 	{
 		for (panel : lightPanelsPairs.get(cycle))
 		{

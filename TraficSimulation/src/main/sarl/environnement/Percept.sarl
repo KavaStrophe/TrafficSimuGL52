@@ -1,9 +1,14 @@
-
+/**
+ * Elément représentant une perception d'un objet sur la route par un Conducteur
+ */
 package environnement
 
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 import org.arakhne.afc.gis.road.primitive.RoadConnection
-
+/**
+ * author Nulboroth
+ * 
+ */
 class Percept {
 	var type : String
 	var data : Object
@@ -44,12 +49,16 @@ class Percept {
 	def getEntryPoint : RoadConnection{
 		return this.entryPoint
 	}
-	def setDistance(distance : float)
+	def setDistance(distance : float) : void
 	{
 		this.distance = distance
 	}
  
-	def addDistance(distance : float) {
+	 /**
+	  * Ajoute une certaine distance à celle des percepts
+	  * @param distance Distance à ajouter
+	  */
+	def addDistance(distance : float) : void {
 		this.distance = this.distance + distance
 	}
 	

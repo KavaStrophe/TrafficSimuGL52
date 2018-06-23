@@ -1,5 +1,5 @@
 /** 
- * Tous les panneaux
+ * Panneaux de stop
  */
 package environnement
 
@@ -8,7 +8,7 @@ import java.util.UUID
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 class StopPanel extends AbstractPanel{

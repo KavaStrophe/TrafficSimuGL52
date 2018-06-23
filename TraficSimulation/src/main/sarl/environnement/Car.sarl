@@ -11,28 +11,42 @@ import org.arakhne.afc.gis.road.primitive.RoadSegment
 import java.util.ArrayList
 
 /**  
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 class Car extends AbstractMobileObject{  
-	var model : CarModel 
-	var color : Color 
-	var gps : ArrayList<RoadSegment>   
+	var model : CarModel  //Modèle du corps
+	var color : Color 		//Couleur du corps
+	var gps : ArrayList<RoadSegment>   //Route GPS
 	
+	/**
+	 * @param id UUID désignant l'objet
+	 * @param length Longueur de l'élément **UNUSED**
+	 * @param point Point d'entrée de l'objet sur le RoadSegment
+	 * @param maxSpeed Vitesse maximale atteignable par le corps
+	 * @param maxAcc Accélération maximale de l'objet
+	 * @param minAcc Descélération maximale de l'objet
+	 * @param color Couleur d'affichage de l'objet
+	 */
 	new(id : UUID, length : float, point : RoadConnection, maxSpeed : float, maxAcc : float, minAcc : float, color : Color)
 	{
 		super(id, length, point, maxSpeed, maxAcc, minAcc)
 		this.model = null
 		this.color = color
 	} 
-
+	
+	/**
+	 * @param id UUID désignant l'objet
+	 * @param connect Point d'entrée de l'objet sur le RoadSegment
+	 * @param model Modèle de la voiture
+	 */
 	new(id : UUID, connect : RoadConnection, model : CarModel) { 
 		
 		this(id, model.length, connect, model.maxSpeed, model.maxAcc, model.minAcc, model.color) 
 		this.model = model
 	}
 	 
-	def setModel(model : CarModel)
+	def setModel(model : CarModel) : void
 	{
 		this.color = model.color
 		this.length = model.length
@@ -40,12 +54,12 @@ class Car extends AbstractMobileObject{
 		this.maxAcc = model.maxAcc
 		this.model = model 
 	} 
-	def getMaxSpeed : float
+	override getMaxSpeed : float
 	{
 		return this.model.maxSpeed
 	}
 
-	def getMaxAcc : float {
+	override getMaxAcc : float {
 		return this.model.maxAcc
 	}
  
@@ -63,10 +77,9 @@ class Car extends AbstractMobileObject{
 	def getGps : ArrayList<RoadSegment> 
 	{
 		return this.gps
-	}
-	def setGps(roads : ArrayList<RoadSegment>)
+	} 
+	def setGps(roads : ArrayList<RoadSegment>) : void
 	{
 		this.gps = roads
 	}
-	
 }

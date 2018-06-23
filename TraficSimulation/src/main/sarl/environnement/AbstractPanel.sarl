@@ -4,7 +4,7 @@
 package environnement
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 abstract class AbstractPanel extends AbstractStaticObject{

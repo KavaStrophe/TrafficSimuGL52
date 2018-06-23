@@ -21,7 +21,7 @@ public class RoadPanelDrawer
 		double y = drawArea.getCenterY();
 		MapCircle sign = new MapCircle(x + position.getX(), y + position.getY(), 3);
 		sign.setColor(color);
-		this.signLayer.addMapElement(sign);
+		RoadPanelDrawer.signLayer.addMapElement(sign);
 	}
 	
 	public void draw(InformedArrayList<Point2d> sign_elements, InformedArrayList<String> type_pannel, Rectangle2d area) {

@@ -6,24 +6,40 @@ package ^agent
 import environnement.Car
 
 /** 
- * @author Nicolas
- *  Comportement qui s'exécutera lorsque le conducteur n'aura aucune autre voiture dans son champ de vision
+ * @author Nulboroth
+ *  Comportement qui s'exécutera lorsque le conducteur n'aura aucun obstacle dans son champ de vision
  */
 class BehaviorSeeking {
+	/**
+	 * @param body Corps de l'agent
+	 * @param maxSpeed Vitesse maximale atteignable par l'agent
+	 * 
+	 * @return Nouvelle accélération pour l'agent
+	 */
 	def run(body : Car, maxSpeed : float) : float
 	{
 		return computeIDM(body.maxAcc, body.minAcc,  body.speed, maxSpeed)
 	}
 	
-	def computeIDM(maxAcc : float, minAcc : float, currSpeed : float, maxSpeed : float)
+	/**
+	 * Calcule l'accélération à adopter pour atteindre la vitesse maximale
+	 * 
+	 * @param maxAcc Acceleration maximale
+	 * @param maxDesc Desceleration maximale
+	 * @param currSpeed Vitesse actuelle de l'agent
+	 * @param maxSpeed Vitesse maximale atteignable par l'agent
+	 * 
+	 * @return Nouvelle acceleration de l'agent
+	 */
+	def computeIDM(maxAcc : float, maxDesc : float, currSpeed : float, maxSpeed : float) : float
 	{
 		var firstStep = Math.pow((currSpeed  / maxSpeed), 4)
 		var finalStep = maxAcc * (1 - firstStep)
 		
-		if (finalStep < -1 * minAcc)
-			finalStep = minAcc
+		if (finalStep < -1 * maxDesc)
+			finalStep = -maxDesc
 		if (finalStep > maxAcc)
 			finalStep = maxAcc
-		return finalStep.floatValue
+		return finalStep.floatValue()
 	}
 }

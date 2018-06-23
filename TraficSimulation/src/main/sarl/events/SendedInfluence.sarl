@@ -3,11 +3,10 @@
  */
 package events
 
-import java.util.UUID
 import environnement.InfluenceAgent
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 event SendedInfluence {

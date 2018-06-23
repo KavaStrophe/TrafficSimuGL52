@@ -8,7 +8,6 @@
 	<packaging>jar</packaging>
 
 	<name>trafficsimulation</name>
-	<url>https://github.com/pinam45/UTBM_IA51_TrafficSimulation</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

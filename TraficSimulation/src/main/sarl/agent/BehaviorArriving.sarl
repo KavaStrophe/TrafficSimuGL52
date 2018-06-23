@@ -7,25 +7,37 @@ import environnement.Car
 import utils.Converter
 import ^agent.BehaviorSeeking
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
- * Comportement que le conducteur adoptera lorsqu'une voiture se situera dans son champs de vision
+ * Comportement que le conducteur adoptera lorsqu'un obstacle immobile se trouve sur la route
  */
 class BehaviorArriving {
 	val stopDistance : float = 10
+	/**
+	 * @param body Corps de l'agent 
+	 * @param maxSpeed Vitesse maximale atteignable par le corps de l'agent
+	 * @param distanceFromObject Distance entre l'agent et l'obstacle
+	 * @return Nouvelle acceleration de l'agent body
+	 */
 	def run(body : Car, distanceFromObject : float , maxSpeed : float) : float
 	{
 		var acc : float
 		var slowDownDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6) + stopDistance
-		if (slowDownDistance < stopDistance)  
+		if(distanceFromObject < stopDistance) //Si la voiture est trop proche, elle freinera au maximum de sa capacité
+		{
+			if(body.speed < body.maxDesc)
+				return -body.speed
+			else
+				return -body.maxDesc
+		}
+		if (slowDownDistance < stopDistance)  //Si la distance de ralentissement calculée est trop basse
 			slowDownDistance = stopDistance 
-		if (distanceFromObject > slowDownDistance + stopDistance)
+		if (distanceFromObject > slowDownDistance + stopDistance) //Dans le cas où l'obstacle est encore assez loin
 			return new BehaviorSeeking().run(body, maxSpeed) 
-		else
+		else //Dans le cas où l'obstacle est assez proche
 			acc =  (new BehaviorFollowing()).computeIDM(body.maxAcc, body.maxDesc, distanceFromObject, body.speed,
 				 maxSpeed, 0, slowDownDistance) 
-			//computeIDM(body.speed, body.maxAcc, body.maxDesc, distanceFromObject, slowDownDistance, maxSpeed)
-		if((body.speed + acc) < 0)
+		if((body.speed + acc) < 0) //Possibilité d'immobiliser totalement la voiture
 		{
 			return -body.speed
 		}

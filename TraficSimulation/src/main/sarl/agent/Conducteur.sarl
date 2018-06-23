@@ -1,73 +1,67 @@
 /** 
- * Agent conducteur possédant un corps (Car)
+ * 
  */
 package ^agent
 
-import environnement.AbstractStaticObject
 import environnement.Car
 import environnement.InfluenceAgent
-import events.GPSPath
-import events.GPSPathReturn
+import environnement.Percept
+import events.IamAtHome
 import events.NeedInfluence
 import events.SendedInfluence
 import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Destroy
-import io.sarl.core.Initialize
 import io.sarl.core.Lifecycle
-import io.sarl.core.Logging
-import java.util.ArrayList
-import org.arakhne.afc.gis.road.primitive.RoadSegment
-import events.AreYouAtHome
-import events.IamAtHome
 import java.util.HashSet
-import environnement.Percept
-import utils.Converter
+import java.util.UUID
 import org.arakhne.afc.gis.road.primitive.RoadConnection
+import utils.Converter
 
 /** 
- * @author Nicolas
- * 
+ * @author Nulboroth
+ * Classe définissant l'agent-mind d'un conducteur
  */
+@SuppressWarnings("potential_field_synchronization_problem")
 agent Conducteur {
-	uses Logging
 	uses Lifecycle
 	uses DefaultContextInteractions
 	
-	var percepts : HashSet<Percept>
-	var seeking = new BehaviorSeeking()
-	var arriving = new BehaviorArriving()
-	var following = new BehaviorFollowing()
-	var body : Car
+	var percepts : HashSet<Percept> //Perceptions de l'agent
+	var seeking = new BehaviorSeeking()  //Comportement de Seeking de l'agent
+	var arriving = new BehaviorArriving() //Comportement d'Arriving de l'agent
+	var following = new BehaviorFollowing() //Comportement de Following de l'agent
+	var body : Car //Corps de l'agent
 	
-	var maxSpeed : float = Converter.convertKHtoMS(50)
+	var maxSpeed : float//Vitesse maximale atteignable par l'agent
 	
-	on Initialize {
-		emit(new GPSPath())
-	}
 
 	on Destroy {
-		killMe
+		killMe()
 	}
 	 
 	
-	/* Reçu à la fin du traitement des perceptions par l'environnement */
+	/**
+	 * Reçu à la fin du traitement des perceptions par l'environnement
+	 */
 	on NeedInfluence{
 		this.percepts = occurrence.percepts
 		this.body = occurrence.body
-		if (this.maxSpeed == 0) 
-			this.maxSpeed = this.body.maxSpeed
-		
-		computeInfluence() 
+		if (this.maxSpeed == 0) //Dans le cas où l'agent ne possède pas encore de maxSpeed
+			this.maxSpeed = this.body.maxSpeed //Il récupère le maxSpeed de son corps
+		computeInfluence(occurrence.source.UUID) 
 	} 
-	
-	def computeInfluence()
+	/**
+	 * Choisira le comportement à adopter selon le cas de figure qui se présente à l'agents
+	 * param id UUID de l'environnement 
+	 */
+	def computeInfluence(id : UUID) : void
 	{
-		var selectedPath = this.body.gps 
+		var selectedPath = this.body.gps //Récupération du contenu du GPS de la voiture
 		var acc : float
-		if(amIAtHome) 
+		if(amIAtHome())  //Test : l'agent est-il à destination ?
 		{
 			acc = 0
-			emit(new IamAtHome(true))
+			emit(new IamAtHome(true)) //Signale à l'environnement qu'il peut détruire le corps de l'agent
 		}
 		else
 		{
@@ -84,18 +78,18 @@ agent Conducteur {
 				if (selectedPath.contains(percept.segment) || (percept.segment == body.segment))
 				{
 					if (percept.distance < 50 && percept.type == "SPEED") {
-						if (maxSpeedTemp == null || maxSpeedTemp.distance > percept.distance)
+						if (maxSpeedTemp === null || maxSpeedTemp.distance > percept.distance)
 							maxSpeedTemp = percept
 					}
 					else if (percept.type == "CAR") {
-						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
+						if (obstacleTemp === null || obstacleTemp.distance > percept.distance)
 						{
 							obstacleTemp = percept
 						}
 					}
 					else if ((percept.type == "LIGHT" && (percept.data == false)) || percept.type == "STOP")
 					{
-						if (obstacleTemp == null || obstacleTemp.distance > percept.distance)
+						if (obstacleTemp === null || obstacleTemp.distance > percept.distance)
 						{
 							obstacleTemp = percept
 						}
@@ -103,46 +97,52 @@ agent Conducteur {
 				}
 			} 
 
-			// Dans le cas où un obstacle se situe devant le véhicule
-			if (maxSpeedTemp != null && maxSpeedTemp.speed < this.body.maxSpeed)
+			// Dans le cas où un panneau de limitation de vitesse est présent
+			if (maxSpeedTemp !== null && maxSpeedTemp.speed < this.body.maxSpeed) //Si l'agent doit réduire sa vitesse
 			{
 				this.maxSpeed = maxSpeedTemp.speed
 			}
+			else if (maxSpeedTemp !== null && maxSpeedTemp.speed > this.body.maxSpeed) // Sinon, il roule à sa vitesse maximum
+			{
+				this.maxSpeed = this.body.maxSpeed
+			}
 				
 			
-			
-			if (obstacleTemp != null)
+			//Dans le cas où un obstacle se présente
+			if (obstacleTemp !== null)
 			{
-				if (obstacleTemp.speed == 0)
+				if (obstacleTemp.speed == 0) //Si l'obstacle est immobile 
 				{
-					//Dans le cas où le panneau STOP a été respecté, ne plus en tenir compte
+					//Dans le cas où il s'agit d'un panneau STOP qui a été respecté, ne plus en tenir compte
 					if (obstacleTemp.type == "STOP" && (this.body.speed < 0.5 || obstacleTemp.distance < 10) &&
 						checkFreeRoad()) {
 						this.percepts.remove(obstacleTemp)
-						computeInfluence()
+						computeInfluence(id)
 						return
 					}
-					//Sinon, ralentir à son approche
+					//Sinon, ralentir à l'approche
 					acc = this.arriving.run(this.body, obstacleTemp.distance, this.maxSpeed)
 					
 				}
-				//Sinon (en général dans le cas des voitures)
+				//Sinon (en général dans le cas des voitures) s'adapter à la vitesse de l'objet
 				else
 				{
 					acc = this.following.run(this.body, obstacleTemp.distance, this.maxSpeed, obstacleTemp.speed)
 				}
 				
 			}
-			//Dans le cas où il n'y a aucun obstacle
+			//Dans le cas où il n'y a aucun obstacle, rouler à la vitesse maximum
 			else
 			{
 				acc = this.seeking.run(this.body, this.maxSpeed)				
 			}
 		}
-		
-		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
+		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc))) [it.UUID == id]//L'influence est envoyée à l'environnement
 	}
 
+	/**
+	 * Dans le cas d'un STOP, vérifie si la voie est dégagée avant de s'avancer
+	 */
 	def checkFreeRoad : boolean {
 		var checkConfirm = true
 		var endPoint : RoadConnection
@@ -162,6 +162,9 @@ agent Conducteur {
 		return checkConfirm
 	}
 
+	/**
+	 * Vérifie si la voiture est bien arrivée à detination
+	 */
 	def amIAtHome : boolean {
 		if (this.body.gps.size() == 0) {
 			if (this.body.position >= this.body.segment.length - 5 || this.body.position <= 5) {
@@ -174,15 +177,6 @@ agent Conducteur {
 			}
 		}
 		return false
-	}
-	 
-	def computeDistanceBefore(object : AbstractStaticObject) : float {
-		var distance : float
-		return distance
-	}
-	def NextObjectOnPath(roads : ArrayList<RoadSegment>) : AbstractStaticObject 
-	{
-		
 	}
 	
 }

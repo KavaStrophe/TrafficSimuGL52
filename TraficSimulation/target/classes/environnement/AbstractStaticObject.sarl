@@ -9,7 +9,7 @@ import org.arakhne.afc.gis.road.primitive.RoadSegment
 import org.arakhne.afc.math.geometry.d2.d.Point2d
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 abstract class AbstractStaticObject {
@@ -19,6 +19,13 @@ abstract class AbstractStaticObject {
 	var entryPoint : RoadConnection
 	var segment : RoadSegment
 
+/**
+ * @param id UUID désignant l'objet
+ * @param point Point d'entrée de l'objet sur le RoadSegment
+ * @param position Position de l'objet sur le RoadSegment
+ * @param segment Segment sur lequel se situe l'objet
+ * @length Taille de l'objet **UNUSED**
+ */
 	new (id : UUID, point : RoadConnection, segment : RoadSegment, position : float, lenght : float)
 	{
 		this.position = position
@@ -27,24 +34,40 @@ abstract class AbstractStaticObject {
 		this.entryPoint = point
 		this.segment = segment
 	}
-	
+
+	/**
+	 * @param id UUID désignant l'objet
+	 * @param point Point d'entrée de l'objet sur le RoadSegment
+	 * @length Taille de l'objet **UNUSED**
+	 */
 	new (id : UUID, point : RoadConnection, lenght : float)
 	{
 		this.segment = point.getConnectedSegment(0)
 		this.entryPoint = point
 		this.id = id
-		if (point == this.segment.getBeginPoint)
+		if (point == this.segment.getBeginPoint())
 			this.position = 0
 		else
-			this.position = this.segment.getLength.floatValue
+			this.position = this.segment.length.floatValue()
 		this.length = length
 	}
 
+	/**
+	 * @param id UUID désignant l'objet
+	 * @param point Point d'entrée de l'objet sur le RoadSegment
+	 * @param position Position de l'objet sur le RoadSegment
+	 * @length Taille de l'objet **UNUSED**
+	 */
 	new (id : UUID, point : RoadConnection, position : float, lenght : float) {  
 		this(id, point, lenght)
 		this.position = position
 	}
 	
+	/**
+	 * Test si les deux objets sont sur le même routes (et partagent donc également le même point d'entrée)
+	 * @param object Objet à examiner
+	 * @return Résultat du test (Vrai/Faux)
+	 */
 	def onSameRoad(object : AbstractStaticObject) : Boolean
 	{
 		if (this.segment === object.segment &&
@@ -53,7 +76,7 @@ abstract class AbstractStaticObject {
 		else 
 			return false 
 	} 
-	def setLength(length : float)
+	def setLength(length : float) : void
 	{
 		this.length = length
 	}
@@ -61,7 +84,7 @@ abstract class AbstractStaticObject {
 	{
 		return this.position 
 	}
-	def setPosition(position : float)
+	def setPosition(position : float) : void
 	{
 		this.position = position 
 	}
@@ -69,7 +92,7 @@ abstract class AbstractStaticObject {
 	{
 		return this.id
 	}
-	def setSegment(segment : RoadSegment)
+	def setSegment(segment : RoadSegment) : void
 	{
 		this.segment = segment
 	}
@@ -77,12 +100,12 @@ abstract class AbstractStaticObject {
 	{
 		return this.segment 
 	}
-	def setEntryPoint(point : RoadConnection)
-	{
+	def setEntryPoint(point : RoadConnection) : void
+	{ 
 		this.entryPoint = point
 	}
 
-	def getEntryPoint() : RoadConnection {
+	def getEntryPoint : RoadConnection {
 		return this.entryPoint
 	}
 

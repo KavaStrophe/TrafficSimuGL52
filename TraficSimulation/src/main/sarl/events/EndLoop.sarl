@@ -1,10 +1,10 @@
 /** 
- * Evènement de fin de boucle
+ * Evènement de fin de boucle de la simulation
  */
 package events
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 event EndLoop

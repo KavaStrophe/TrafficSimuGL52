@@ -9,7 +9,7 @@ import org.arakhne.afc.gis.road.primitive.RoadConnection
 import org.arakhne.afc.gis.road.primitive.RoadSegment
 
 /** 
- * @author Nicolas
+ * @author Nulboroth
  * 
  */
 abstract class AbstractMobileObject extends AbstractStaticObject {
@@ -20,17 +20,25 @@ abstract class AbstractMobileObject extends AbstractStaticObject {
 	
 	var currentLinearSpeed : float = 0 
 	
+	/**
+	 * @param id UUID désignant l'objet
+	 * @param length Longueur du véhicule **UNUSED**
+	 * @param point Point d'entrée de l'objet sur le RoadSegment
+	 * @param maxSpeed Vitesse maximale de l'objet
+	 * @param maxAcc Accélération maximale de l'objet
+	 * @param minAcc Descéleration maximale de l'objet
+	 */
 	new (id : UUID, length : float, point : RoadConnection, maxSpeed : float, maxAcc : float, minAcc : float)
 	{
 		super(id, point, length)
 		this.maxLinearSpeed = maxSpeed
 		this.maxLinearAcceleration = maxAcc
 		this.maxLinearDesceleration = minAcc 
-		this.targets = new ArrayList()
+		this.targets = new ArrayList() //GPS path
 	}
 	
 	def getSpeed : float
-	{
+	{ 
 		return this.currentLinearSpeed
 	}
 	def targets : ArrayList<RoadSegment> {
@@ -46,15 +54,15 @@ abstract class AbstractMobileObject extends AbstractStaticObject {
 	def getMaxAcc : float {
 		return this.maxLinearAcceleration
 	}
-	def setMaxSpeed(maxSpeed : float)
+	def setMaxSpeed(maxSpeed : float) : void
 	{
 		this.maxLinearSpeed = maxSpeed
 	} 
-	def setMaxAcc(maxAcc : float)  
+	def setMaxAcc(maxAcc : float) : void
 	{
 		this.maxLinearAcceleration = maxAcc
 	}
-	def setSpeed(speed : float) {
+	def setSpeed(speed : float) : void {
 		this.currentLinearSpeed = speed
 	}
 }

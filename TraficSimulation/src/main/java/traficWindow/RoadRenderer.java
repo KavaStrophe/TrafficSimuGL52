@@ -33,9 +33,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import org.arakhne.afc.gis.mapelement.GISElementContainer;
-import org.arakhne.afc.gis.mapelement.MapCircle;
 import org.arakhne.afc.gis.mapelement.MapElement;
-import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 import org.arakhne.afc.gis.maplayer.GISLayerContainer;
 import org.arakhne.afc.gis.maplayer.MapElementLayer;
 import org.arakhne.afc.gis.maplayer.MapLayer;
@@ -46,7 +44,6 @@ import org.arakhne.afc.gis.ui.GisPane;
 import org.arakhne.afc.math.geometry.d2.d.Point2d;
 import org.arakhne.afc.math.geometry.d2.d.Rectangle2d;
 import org.arakhne.afc.text.TextUtil;
-import org.arakhne.afc.util.InformedArrayList;
 import org.arakhne.afc.vmutil.json.JsonBuffer;
 import org.arakhne.afc.vmutil.locale.Locale;
 

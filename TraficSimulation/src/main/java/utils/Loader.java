@@ -20,9 +20,21 @@ import org.arakhne.afc.io.shape.ShapeElementType;
 import org.arakhne.afc.math.geometry.d2.d.Rectangle2d;
 import org.arakhne.afc.vmutil.FileSystem;
 
+import environnement.PersonalizedRoadNetwork;
 import traficWindow.RoadRenderer;
 
+/**
+ * Classe de chargement du fichier Shapefile
+ * @author Nulboroth
+ *
+ */
 public class Loader {
+	/**
+	 * Charge le fichier shapefile et son fichier de DB associé
+	 * @param fileDesc Chemin du fichier
+	 * @return RoadNetwork créé à partir du fichier
+	 */
+	@SuppressWarnings("unused")
 	public static PersonalizedRoadNetwork loadShapeFile(String fileDesc) {
 		File file;
 		
