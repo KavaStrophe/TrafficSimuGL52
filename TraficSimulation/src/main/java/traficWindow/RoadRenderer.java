@@ -108,8 +108,6 @@ public class RoadRenderer extends Application {
 	public void update() {
 		carLayer.update();
 		lightLayer.update();
-		speedPanelLayer.update();
-		stopPanelLayer.update();
 		if(scrollPane != null) {
 			scrollPane.drawContent();
 		}
@@ -122,6 +120,8 @@ public class RoadRenderer extends Application {
 		layer.addMapLayer(this.roadLayer);
 		layer.addMapLayer(this.lightLayer);
 		layer.addMapLayer(this.carLayer);
+		layer.addMapLayer(this.stopPanelLayer);
+		layer.addMapLayer(this.speedPanelLayer);
 
 	
 		final GISContainer container;
@@ -191,6 +191,10 @@ public class RoadRenderer extends Application {
 		primaryStage.setTitle(Locale.getString(RoadRenderer.class, "Trafic Simulation - Visualisation")); //$NON-NLS-1$
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		
+
+		speedPanelLayer.update();
+		stopPanelLayer.update();
 	}
 
 	/** Replies the element at the given mouse position.

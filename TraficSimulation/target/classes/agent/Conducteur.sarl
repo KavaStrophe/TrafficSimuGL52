@@ -39,7 +39,7 @@ agent Conducteur {
 	var following = new BehaviorFollowing()
 	var body : Car
 	
-	var maxSpeed : Integer = 0
+	var maxSpeed : float = Converter.convertKHtoMS(50)
 	
 	on Initialize {
 		emit(new GPSPath())
@@ -55,7 +55,7 @@ agent Conducteur {
 		this.percepts = occurrence.percepts
 		this.body = occurrence.body
 		if (this.maxSpeed == 0) 
-			this.maxSpeed = this.body.maxSpeed.intValue
+			this.maxSpeed = this.body.maxSpeed
 		
 		computeInfluence() 
 	} 
@@ -83,7 +83,7 @@ agent Conducteur {
 				// On ne retient que les Percept sur notre chemin
 				if (selectedPath.contains(percept.segment) || (percept.segment == body.segment))
 				{
-					if (percept.distance < 30 && percept.type == "SPEED") {
+					if (percept.distance < 50 && percept.type == "SPEED") {
 						if (maxSpeedTemp == null || maxSpeedTemp.distance > percept.distance)
 							maxSpeedTemp = percept
 					}
@@ -104,26 +104,16 @@ agent Conducteur {
 			} 
 
 			// Dans le cas où un obstacle se situe devant le véhicule
-			System.out.println("============================================================")
+			if (maxSpeedTemp != null && maxSpeedTemp.speed < this.body.maxSpeed)
+			{
+				this.maxSpeed = maxSpeedTemp.speed
+			}
+				
 			
 			
 			if (obstacleTemp != null)
 			{
-				System.out.println("TYPE OBS : " + obstacleTemp.type)
-				System.out.println("DISTANCE OBS : " + obstacleTemp.distance)
-				System.out.println("TAILE SEGMENT : " + this.body.segment.length)
-				System.out.println("BODY POSITION : " + this.body.position)
-				System.out.println("BODY SPEED : " + this.body.speed)
-				System.out.println("TARGET SPEED : " + obstacleTemp.speed)
-				System.out.println("ACCELERATION FINALE : " + acc)
-				//Si l'obstacle, qui n'est pas une voiture, est encore assez éloigné
-				if (safetyDistance > obstacleTemp.distance + 10 && obstacleTemp != "CAR")
-				{
-					acc = this.seeking.run(body, maxSpeed)
-					System.out.println("TYPE :  SEEKING")
-				}
-				//Si l'obstacle est arrêté (ex : Panneaux)
-				else if (obstacleTemp.speed == 0)
+				if (obstacleTemp.speed == 0)
 				{
 					//Dans le cas où le panneau STOP a été respecté, ne plus en tenir compte
 					if (obstacleTemp.type == "STOP" && (this.body.speed < 0.5 || obstacleTemp.distance < 10) &&
@@ -133,7 +123,6 @@ agent Conducteur {
 						return
 					}
 					//Sinon, ralentir à son approche
-					System.out.println("TYPE :  ARRIVING")
 					acc = this.arriving.run(this.body, obstacleTemp.distance, this.maxSpeed)
 					
 				}
@@ -141,19 +130,15 @@ agent Conducteur {
 				else
 				{
 					acc = this.following.run(this.body, obstacleTemp.distance, this.maxSpeed, obstacleTemp.speed)
-					System.out.println("TYPE :  FOLLOWING")
 				}
 				
 			}
 			//Dans le cas où il n'y a aucun obstacle
 			else
 			{
-				acc = this.seeking.run(this.body, this.maxSpeed)
-				System.out.println("TYPE :  SEEKING")
-				
+				acc = this.seeking.run(this.body, this.maxSpeed)				
 			}
 		}
-		System.out.println("============================================================")
 		
 		emit(new SendedInfluence(new InfluenceAgent(selectedPath, acc)))
 	}
@@ -198,10 +183,6 @@ agent Conducteur {
 	def NextObjectOnPath(roads : ArrayList<RoadSegment>) : AbstractStaticObject 
 	{
 		
-	}
-
-	def computeMaxSpeed(segments : ArrayList<RoadSegment>) : float {
-		return 0
 	}
 	
 }

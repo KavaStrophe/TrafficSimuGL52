@@ -45,7 +45,7 @@ public class StopPanelLayer extends ArrayMapElementLayer<MapElement>
 			
 			int colorLight = 0;
 			MapCircle mapCircle = new MapCircle(c.getPosition2d(), STOP_PANEL_RADIUS);
-			colorLight = 0xFF4500;
+			colorLight = 0x004500;
 			mapCircle.setColor(colorLight);
 			this.addMapElement(mapCircle);
 			

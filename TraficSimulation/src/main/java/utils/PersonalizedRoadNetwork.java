@@ -78,47 +78,33 @@ public class PersonalizedRoadNetwork extends StandardRoadNetwork {
 		return this.speedPanel;
 	}
 	
-	public void addStopPanelOnThisRoadConnection(RoadConnection point) {
-		int randomNumSegment = 0;// (int) Math.round(Math.random() * 2);
-		RoadSegment segmentFinal = point.getConnectedSegment(0);
-		RoadConnection endPoint;
-		float distance = 10;
-		Iterable<RoadSegment> segments = point.getConnectedSegments();
-		for(RoadSegment segment : segments)
-		{
-			RoadConnection tempPoint;
-			if(segment.getEndPoint() == point)
-			{
-				tempPoint = segment.getBeginPoint();
-			}
-			else
-			{
-				tempPoint = segmentFinal.getEndPoint();
-			}
-			
-			if(tempPoint.getConnectedSegmentCount() == 1)
-			{
-				segmentFinal = segment;
-				break;
-			}
-			else
-			{
-				if(segmentFinal.getLength() < segment.getLength())
-				{
-					segmentFinal = segment;
-				}
-			}
-		}
+	public void addSpeedPanelOnThisRoadSegment(RoadSegment segment, int speedLimit, float distance)
+	{
+		UUID id = UUID.randomUUID();
 		
+		SpeedPanel panel1 = new SpeedPanel(id, segment.getBeginPoint(), segment, distance, speedLimit);
+		SpeedPanel panel2 = new SpeedPanel(id, segment.getEndPoint(), segment, distance, speedLimit);
+
+		this.speedPanel.add(panel1);
+		this.speedPanel.add(panel2);
+		addObjectToThisSegment("PANEL", panel1, segment);
+		addObjectToThisSegment("PANEL", panel2, segment);
+	}
+	
+	public void addStopPanelOnThisRoadConnection(RoadConnection point) {
+		int randomNumSegment = (int) Math.round(Math.random() * 2);
+		RoadSegment segmentFinal = point.getConnectedSegment(randomNumSegment);
+		RoadConnection endPoint;
+		float distance = 20;
 
 		if(segmentFinal.getEndPoint() == point)
 		{
 			endPoint = segmentFinal.getBeginPoint();
+			distance = (float) (segmentFinal.getLength() - distance);
 		}
 		else
 		{
 			endPoint = segmentFinal.getEndPoint();
-			distance = (float) (segmentFinal.getLength() - 10);
 		}
 		addStopPanel(distance, segmentFinal, endPoint);
 	}

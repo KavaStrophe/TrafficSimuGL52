@@ -15,18 +15,20 @@ class BehaviorArriving {
 	val stopDistance : float = 10
 	def run(body : Car, distanceFromObject : float , maxSpeed : float) : float
 	{
-		var slowDownDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6)
-		if (slowDownDistance < 20) 
-			slowDownDistance = 20  
-		if (distanceFromObject > slowDownDistance)
+		var acc : float
+		var slowDownDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6) + stopDistance
+		if (slowDownDistance < stopDistance)  
+			slowDownDistance = stopDistance 
+		if (distanceFromObject > slowDownDistance + stopDistance)
 			return new BehaviorSeeking().run(body, maxSpeed) 
 		else
-			return (new BehaviorFollowing()).computeIDM(body.maxAcc, body.maxDesc, distanceFromObject, body.speed,
+			acc =  (new BehaviorFollowing()).computeIDM(body.maxAcc, body.maxDesc, distanceFromObject, body.speed,
 				 maxSpeed, 0, slowDownDistance) 
 			//computeIDM(body.speed, body.maxAcc, body.maxDesc, distanceFromObject, slowDownDistance, maxSpeed)
+		if((body.speed + acc) < 0)
+		{
+			return -body.speed
+		}
+		return acc
 	}
-	def computeIDM(speed : float, maxAcc : float, maxDesc : float, distanceFromObject : float, slowDownDistance : float, maxSpeed : float) : float
-	{
-		return -maxDesc
-	}
-}
+} 

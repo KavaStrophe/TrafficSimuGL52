@@ -46,7 +46,14 @@ public class SpeedPanelLayer extends ArrayMapElementLayer<MapElement>
 			
 			int colorLight = 0;
 			MapCircle mapCircle = new MapCircle(c.getPosition2d(), SPEED_PANEL_RADIUS);
-			colorLight = 0x4169E1;
+			if(c.getIndicatedSpeed() == 30)
+				colorLight = 0xC7F703;
+			else if(c.getIndicatedSpeed() == 50)
+				colorLight = 0x84CA03;
+			else if(c.getIndicatedSpeed() == 70)
+				colorLight = 0x03BD28;
+			else if(c.getIndicatedSpeed() == 90)
+				colorLight = 0x004F10;
 			mapCircle.setColor(colorLight);
 			this.addMapElement(mapCircle);
 			

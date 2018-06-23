@@ -14,9 +14,9 @@ import utils.Converter
 class BehaviorFollowing {
 	def run(body : Car, distanceFromObject : float, maxSpeed : float, speedObject : float) : float
 	{
-		var safetyDistance = (Converter.convertMStoKM(body.speed) / 10) * 6
-		if (safetyDistance < 15)
-			safetyDistance = 15
+		var safetyDistance = ((Converter.convertMStoKM(body.speed) / 10) * 6) + 10
+		if (safetyDistance < 10)
+			safetyDistance = 10
 			
 		return computeIDM(body.maxAcc, body.minAcc, distanceFromObject, body.speed, maxSpeed, speedObject,
 			safetyDistance)
@@ -34,33 +34,23 @@ class BehaviorFollowing {
 	) : float
 	{
 		var finalAcc : float;
-		//System.out.println("Distance from obj : " + distanceFromObject)
-		//System.out.println("Current speed ms : " + currSpeed)
-		//System.out.println("Current speed km : " + Converter.convertMStoKM(currSpeed))
-		//System.out.println("Safety Distance : " + safetyDistance)
-		//System.out.println("Safety Distance : " + safetyDistance)
 		var diffSpeed = currSpeed - speedObject
-		//System.out.println("Diff Vitesse : " + diffSpeed)
 		var timeBeforeCollision = distanceFromObject / idealSpeed
-		//System.out.println("timeBeforeCollision : " + timeBeforeCollision)
 		
 		var firstPart = Math.pow(currSpeed/idealSpeed, 4)
-		//System.out.println("firstPart : " + firstPart)
 		
 		var secondPart1 = (safetyDistance + currSpeed * timeBeforeCollision) / distanceFromObject
 		var secondPart2 = (currSpeed * diffSpeed) / (2 * distanceFromObject * Math.sqrt(maxAccAgent * maxDesAgent))
-		//System.out.println("secondPartFirst : " + secondPart1)
-		//System.out.println("secondPartSecond : " + secondPart2)
 		
 		var secondPart = Math.pow(secondPart1 + secondPart2, 2)
-		//System.out.println("secondPart : " + secondPart)
 
 		var precal = (1 - firstPart - secondPart)
+		
 		if (precal > 0)
 			finalAcc = (maxAccAgent * precal).floatValue
 		else
 			finalAcc = (maxDesAgent * precal).floatValue
-		//System.out.println("finalSpep : " + finalAcc
+
 		if (finalAcc < -maxDesAgent)
 			finalAcc = -maxDesAgent
 		if (finalAcc > maxAccAgent)
