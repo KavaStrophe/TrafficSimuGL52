@@ -35,6 +35,7 @@ import utils.ThreadComputer
 import static traficWindow.RoadRenderer.*
 
 import configurationwindow.Configuration
+import configfile.CarConfig
 
 /** 
  * @author Nulboroth
@@ -69,7 +70,11 @@ agent Simulation{
 		}
 		
 		if (Configuration.getInstance().shapeFile !== null && Configuration.getInstance().isValid()) {
-			
+			var carsModels = Configuration.getInstance().getCarConfigList()
+			for (newCarModel : carsModels)
+			{
+				addModel(newCarModel)
+			}
 			typeSpeedPanel.add(30)
 			typeSpeedPanel.add(50)
 			typeSpeedPanel.add(70)
@@ -83,13 +88,6 @@ agent Simulation{
 			RoadRenderer.stopPanelLayer = new StopPanelLayer(this.roadNetwork.stopPanel);
 			this.roadRenderer = ThreadComputer.startRoadRenderer()
 	
-			var carModel1 = new CarModel(10, 100, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
-			var carModel2 = new CarModel(10, 60, 10, 10, new Color(0.9, 0, 0, 0), "TEST2", 150)
-	
-			addModel(carModel1)
-			addModel(carModel2)
-			this.desiredNbModel.put(carModel1.name, 10)
-			this.desiredNbModel.put(carModel2.name, 0)
 			wake(new BeginLoop())
 		}
 	} 
@@ -302,9 +300,12 @@ agent Simulation{
 	/**
 	 * Ajoute un modèle dans la liste de ceux utilisables
 	 * @param Modèle à ajouter
+	 * @param Nombre de modèle maximum pouvant apparaitre dans la simulation
 	 */
-	def addModel(model : CarModel) : void{
-		this.definedModels.put(model.name, model)
+	def addModel(model : CarConfig) : void {
+		var carmodel = new CarModel(model)
+		this.definedModels.put(carmodel.name, carmodel)
+		this.desiredNbModel.put(carmodel.name, model.getAgentNumber())
 	}
 
 	/**
@@ -313,6 +314,7 @@ agent Simulation{
 	 */
 	def removeModel(name : String) : void{
 		this.definedModels.remove(name)
+		this.desiredNbModel.remove(name)
 	}
 	
 	/**

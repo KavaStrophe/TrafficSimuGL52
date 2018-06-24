@@ -46,14 +46,14 @@ public class Configuration {
 	}
 
 	public File getShapeFile() {
-		return shapeFile;
+		return this.shapeFile;
 	}
 
 
 	public ObservableList<CarConfig> getCarConfigList(){
 
 		
-		return carConfigList;
+		return this.carConfigList;
 		
 	}
 

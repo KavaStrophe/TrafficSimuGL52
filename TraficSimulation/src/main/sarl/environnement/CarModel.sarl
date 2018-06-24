@@ -5,6 +5,7 @@ package environnement
 
 import javafx.scene.paint.Color
 import utils.Converter
+import configfile.CarConfig
 
 /** 
  * @author Nulboroth
@@ -37,6 +38,16 @@ class CarModel {
 		this.viewDistance = viewDistance
 		this.color = color
 		this.name = name
+	}
+	
+	new(config : CarConfig) {
+		this.length = config.getLenght()
+		this.maxLinearSpeed = Converter.convertKHtoMS(config.getMaxSpeed())
+		this.maxLinearAcceleration = Converter.convertKHtoMS(config.getMaxAccel())
+		this.maxLinearDesceleration = Converter.convertKHtoMS(config.getMaxDecel())
+		this.viewDistance = config.getViewDistance()
+		this.color = config.getColor()
+		this.name = config.getName()
 	}
 	
 	def getLength : float
