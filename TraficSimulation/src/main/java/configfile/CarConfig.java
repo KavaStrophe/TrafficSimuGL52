@@ -12,7 +12,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
-
+/**CarConfig class used to set the property of a car
+ * 
+ * @author Nahil
+ *
+ */
 @JsonDeserialize(using = CarConfigDeserializer.class)
 public class CarConfig {
 	
@@ -25,7 +29,16 @@ public class CarConfig {
 	private IntegerProperty agentNumber;
 	
 	
-
+	/**Constructor for a CarConfig
+	 * 
+	 * @param name
+	 * @param lenght
+	 * @param maxSpeed
+	 * @param maxAccel
+	 * @param maxDecel
+	 * @param color
+	 * @param agentNumber
+	 */
 	public CarConfig(String name, float lenght, float maxSpeed, float maxAccel, float maxDecel,  Color color, int agentNumber) {
 		super();
 		this.name = new SimpleStringProperty(name);

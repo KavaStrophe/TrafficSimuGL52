@@ -9,13 +9,20 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 
+/**Configuration singleton for the simulation. Keep all the configurations properties. 
+ * 
+ * @author Nahil
+ *
+ */
 public class Configuration {
 	
 	
 	
 	private static volatile Configuration instance;
 	
+	//List of CarConfig to use during the simulation
 	private ObservableList<CarConfig> carConfigList = FXCollections.observableArrayList();
+	//ShapeFile
 	private File shapeFile;
 	private boolean isValid;
 	
@@ -50,6 +57,9 @@ public class Configuration {
 		
 	}
 
+	/**
+	 * Launch the configurationWindow used to set the configuration properties
+	 */
 	public void launchConfigurationWindow() {
 		isValid = false;
 		LaunchWindow l = new LaunchWindow();

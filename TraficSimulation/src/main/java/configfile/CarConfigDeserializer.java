@@ -11,6 +11,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import javafx.scene.paint.Color;
 
+/**Json Deserializer using Jackson for CarConfig
+ * 
+ * @author Nahil
+ *
+ */
 public class CarConfigDeserializer extends StdDeserializer<CarConfig> {
 
 	public CarConfigDeserializer() {

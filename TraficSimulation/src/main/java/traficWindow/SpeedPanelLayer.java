@@ -12,7 +12,11 @@ import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 import environnement.SpeedPanel;
 
 
-
+/**SpeedPanelLayer, used to display the speedPanels.
+ * 
+ * @author Nahil
+ *
+ */
 public class SpeedPanelLayer extends ArrayMapElementLayer<MapElement>
 {
 	

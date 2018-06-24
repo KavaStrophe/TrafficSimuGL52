@@ -11,7 +11,11 @@ import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 import environnement.Car;
 import javafx.scene.paint.Color;
 
-
+/**CarLayer, used to display the cars.
+ * 
+ * @author Nahil
+ *
+ */
 public class CarLayer extends ArrayMapElementLayer<MapElement>
 {
 	
@@ -55,6 +59,13 @@ public class CarLayer extends ArrayMapElementLayer<MapElement>
 
 	}
 	
+	/**Convert Color to an int.
+	 * 
+	 * @param Red
+	 * @param Green
+	 * @param Blue
+	 * @return
+	 */
 	private int getIntFromColor(double Red, double Green, double Blue){
 	    int R = (int) Math.round(255 * Red);
 	    int G = (int) Math.round(255 * Green);

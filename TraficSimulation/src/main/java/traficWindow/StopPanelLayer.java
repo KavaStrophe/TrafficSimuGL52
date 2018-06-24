@@ -11,7 +11,11 @@ import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 import environnement.StopPanel;
 
 
-
+/**StopPanelLayer, used to display the stopPanels.
+ * 
+ * @author Nahil
+ *
+ */
 public class StopPanelLayer extends ArrayMapElementLayer<MapElement>
 {
 	

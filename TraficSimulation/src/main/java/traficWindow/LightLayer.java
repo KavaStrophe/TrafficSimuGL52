@@ -12,7 +12,11 @@ import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 import environnement.LightPanel;
 
 
-
+/**LightLayer, used to display the light panels.
+ * 
+ * @author Nahil
+ *
+ */
 public class LightLayer extends ArrayMapElementLayer<MapElement>
 {
 	

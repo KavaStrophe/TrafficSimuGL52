@@ -1,17 +1,16 @@
 package configurationwindow;
 
-import java.io.File;
-
-
-import configfile.CarConfig;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**JavaFX Application used to launch the configuration window before the simulation
+ * 
+ * @author Nahil
+ *
+ */
 public class LaunchWindow extends Application {
 
 	private LaunchController controller;
@@ -29,7 +28,6 @@ public class LaunchWindow extends Application {
 			Parent root = (Parent)loader.load();
 			Scene scene = new Scene(root);
 			controller = (LaunchController)loader.getController();
-			controller.setLauncher(this);
 			controller.setStage(primaryStage); 
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);

@@ -9,12 +9,7 @@ import java.util.ResourceBundle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import configfile.CarConfig;
-import environnement.Simulation;
-import io.sarl.bootstrap.SRE;
-import io.sarl.bootstrap.SREBootstrap;
-import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,6 +25,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
+/**Controller for the configuration window
+ * 
+ * @author Nahil
+ *
+ */
 public class LaunchController implements Initializable {
 	
 	@FXML
@@ -70,7 +70,7 @@ public class LaunchController implements Initializable {
 	
 	ObjectMapper objectMapper = new ObjectMapper();
 	private Stage stage;
-	private LaunchWindow launcher;
+
 
 	
 	
@@ -78,9 +78,22 @@ public class LaunchController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		
 		
+		carTableView.setItems(Configuration.getInstance().getCarConfigList());
 		
-		
+		Configuration.getInstance().getCarConfigList().addListener(new ListChangeListener<CarConfig>() {
 
+			@Override
+			public void onChanged(javafx.collections.ListChangeListener.Change<? extends CarConfig> c) {
+				if(Configuration.getInstance().getCarConfigList().isEmpty()){
+					nextButton.setDisable(true);
+				}else if(Configuration.getInstance().getShapeFile() != null){
+					nextButton.setDisable(false);
+				}
+				
+			}
+			
+		});
+		
 		carNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 		carNameColumn.setOnEditCommit(
 	            new EventHandler<CellEditEvent<CarConfig, String>>() {
@@ -268,27 +281,6 @@ public class LaunchController implements Initializable {
 	}
 	
 	
-	
-	public void setLauncher(LaunchWindow launcher) {
-		this.launcher = launcher;
-		carTableView.setItems(Configuration.getInstance().getCarConfigList());
-		
-		
-		Configuration.getInstance().getCarConfigList().addListener(new ListChangeListener<CarConfig>() {
-
-			@Override
-			public void onChanged(javafx.collections.ListChangeListener.Change<? extends CarConfig> c) {
-				if(Configuration.getInstance().getCarConfigList().isEmpty()){
-					nextButton.setDisable(true);
-				}else if(Configuration.getInstance().getShapeFile() != null){
-					nextButton.setDisable(false);
-				}
-				
-			}
-			
-		});
-	}
-
 
 	public void setStage(Stage stage){
 		this.stage = stage;

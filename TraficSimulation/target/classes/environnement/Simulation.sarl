@@ -63,9 +63,11 @@ agent Simulation{
 	on Initialize {
 
 		Configuration.instance.launchConfigurationWindow
+		
 		synchronized(Configuration.getInstance()){
 			Configuration.getInstance().wait();
 		}
+		
 		if (Configuration.getInstance().shapeFile !== null && Configuration.getInstance().isValid()) {
 			
 			typeSpeedPanel.add(30)
