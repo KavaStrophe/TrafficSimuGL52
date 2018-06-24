@@ -257,8 +257,12 @@ public class LaunchController implements Initializable {
 		});
 		
 		nextButton.setOnAction((event)->{
-			Configuration.setValid(true);
-			stage.close();
+			
+			synchronized(Configuration.getInstance()) {
+				Configuration.getInstance().setValid(true);
+				Configuration.getInstance().notify();
+				stage.close();
+			}
 			
 		});
 	}

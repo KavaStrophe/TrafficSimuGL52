@@ -17,7 +17,7 @@ public class Configuration {
 	
 	private ObservableList<CarConfig> carConfigList = FXCollections.observableArrayList();
 	private File shapeFile;
-	private static boolean isValid;
+	private boolean isValid;
 	
 	
 	
@@ -76,7 +76,7 @@ public class Configuration {
 	}
 
 
-	public static void setValid(boolean b) {
+	public void setValid(boolean b) {
 		isValid = b;
 	}
 }
