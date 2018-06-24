@@ -37,7 +37,6 @@ public class LightLayer extends ArrayMapElementLayer<MapElement>
 		this.lightList = lightList;
 	}
 	
-	
 	/**
 	 * Update method for the LightLayer. Intended to be used at each frame. 
 	 * 

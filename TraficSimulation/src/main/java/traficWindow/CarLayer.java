@@ -9,6 +9,8 @@ import org.arakhne.afc.gis.maplayer.ArrayMapElementLayer;
 
 
 import environnement.Car;
+import filter.CarFilter;
+import filter.FilterConfiguration;
 import javafx.scene.paint.Color;
 
 /**CarLayer, used to display the cars.
@@ -47,13 +49,29 @@ public class CarLayer extends ArrayMapElementLayer<MapElement>
 		
 		this.removeAllMapElements();
 		for(Car c : carList) {
+			boolean displayed = false;
+			for(CarFilter f : FilterConfiguration.getInstance().getFilterList()) {
+				if(!displayed && f.getActive()) {
+					if(f.getCarModel() == null || c.getModel().getName().equals(f.getCarModel())) {
+						if((Math.abs(c.getSpeed())>f.getMinSpeed() || f.getMinSpeed() <= -1)&&(Math.abs(c.getSpeed())<f.getMaxSpeed() || f.getMaxSpeed() <= -1)){
+							displayed = true;
+							MapCircle mapCircle = new MapCircle(c.getPosition2d(), CAR_RADIUS);
+							Color carColor = f.getColor();
+							mapCircle.setColor(getIntFromColor(carColor.getRed(), carColor.getGreen(), carColor.getBlue()));
+							this.addMapElement(mapCircle);
+							
+						}
+					}
+				}
+			}
 			
-			// TODO : check filters
-			MapCircle mapCircle = new MapCircle(c.getPosition2d(), CAR_RADIUS);
-			Color carColor = c.getColor();
-			mapCircle.setColor(getIntFromColor(carColor.getRed(), carColor.getGreen(), carColor.getBlue()));
-			this.addMapElement(mapCircle);
 			
+			if(!displayed && FilterConfiguration.getInstance().getDisplayOtherCars() ) {
+				MapCircle mapCircle = new MapCircle(c.getPosition2d(), CAR_RADIUS);
+				Color carColor = c.getColor();
+				mapCircle.setColor(getIntFromColor(carColor.getRed(), carColor.getGreen(), carColor.getBlue()));
+				this.addMapElement(mapCircle);
+			}
 		}
 		
 

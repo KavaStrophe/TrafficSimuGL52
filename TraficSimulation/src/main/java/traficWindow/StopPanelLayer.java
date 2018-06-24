@@ -36,7 +36,6 @@ public class StopPanelLayer extends ArrayMapElementLayer<MapElement>
 		this.stopPanelList = stopList;
 	}
 	
-	
 	/**
 	 * Update method for the StopPanelLayer. Intended to be used at each frame. 
 	 * 
