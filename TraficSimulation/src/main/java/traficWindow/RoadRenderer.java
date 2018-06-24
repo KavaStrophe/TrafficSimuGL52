@@ -69,11 +69,7 @@ public class RoadRenderer extends Application {
 
 	
 	
-	/*
-	public static CarDrawer car_drawer = new CarDrawer(carLayer);
-	public static LightPanelDrawer light_panel_drawer = new LightPanelDrawer(panelLayer);
-	public static RoadPanelDrawer road_panel_drawer = new RoadPanelDrawer(panelLayer);
-*/
+
 	public static final CountDownLatch latch = new CountDownLatch(1);
     public static RoadRenderer renderer = null;
     

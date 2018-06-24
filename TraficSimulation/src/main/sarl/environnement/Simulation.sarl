@@ -33,7 +33,8 @@ import utils.Loader
 import utils.ThreadComputer
 
 import static traficWindow.RoadRenderer.*
-import configurationwindow.LaunchWindow
+
+import configurationwindow.Configuration
 
 /** 
  * @author Nulboroth
@@ -61,32 +62,36 @@ agent Simulation{
 	
 	on Initialize {
 
-		var launchWindow = new LaunchWindow();
-		launchWindow.run();
-		
-		
-		typeSpeedPanel.add(30)
-		typeSpeedPanel.add(50)
-		typeSpeedPanel.add(70)
-		typeSpeedPanel.add(90)
-		this.roadNetwork = Loader.loadShapeFile("ressources/Quartier.shp")
-		generateDefaultPanels()
-		RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
-		RoadRenderer.carLayer = new CarLayer(agentBodies.values());
-		RoadRenderer.lightLayer = new LightLayer(this.roadNetwork.lightPanel);
-		RoadRenderer.speedPanelLayer = new SpeedPanelLayer(this.roadNetwork.speedPanel);
-		RoadRenderer.stopPanelLayer = new StopPanelLayer(this.roadNetwork.stopPanel);
-		this.roadRenderer = ThreadComputer.startRoadRenderer()
+		Configuration.instance.launchConfigurationWindow
 
-		var carModel1 = new CarModel(10,  100, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
-		var carModel2 = new CarModel(10, 60, 10, 10, new Color(0.9, 0, 0, 0), "TEST2", 150)
-		
-		addModel(carModel1) 
-		addModel(carModel2)
-		this.desiredNbModel.put(carModel1.name, 10)
-		this.desiredNbModel.put(carModel2.name, 0)
-		wake(new BeginLoop())
-		
+		while (!Configuration.getInstance().isValid){
+			Thread.sleep(10);
+		}
+
+		if (Configuration.getInstance().shapeFile !== null) {
+			
+			typeSpeedPanel.add(30)
+			typeSpeedPanel.add(50)
+			typeSpeedPanel.add(70)
+			typeSpeedPanel.add(90)
+			this.roadNetwork = Loader.loadShapeFile(Configuration.getInstance().shapeFile)
+			generateDefaultPanels()
+			RoadRenderer.roadLayer = new RoadNetworkLayer(this.roadNetwork);
+			RoadRenderer.carLayer = new CarLayer(agentBodies.values());
+			RoadRenderer.lightLayer = new LightLayer(this.roadNetwork.lightPanel);
+			RoadRenderer.speedPanelLayer = new SpeedPanelLayer(this.roadNetwork.speedPanel);
+			RoadRenderer.stopPanelLayer = new StopPanelLayer(this.roadNetwork.stopPanel);
+			this.roadRenderer = ThreadComputer.startRoadRenderer()
+	
+			var carModel1 = new CarModel(10, 100, 10, 10, new Color(0, 0.9, 0, 0), "TEST1", 150)
+			var carModel2 = new CarModel(10, 60, 10, 10, new Color(0.9, 0, 0, 0), "TEST2", 150)
+	
+			addModel(carModel1)
+			addModel(carModel2)
+			this.desiredNbModel.put(carModel1.name, 10)
+			this.desiredNbModel.put(carModel2.name, 0)
+			wake(new BeginLoop())
+		}
 	} 
 	
 	on BeginLoop {
@@ -315,7 +320,7 @@ agent Simulation{
 	 * @param model Modèle que le corps de l'agent doit utiliser
 	 * @param idSpawneur Spawneur sur lequel devra apparaître l'agent
 	 */
-	def addAgentToTheSimulation(model : CarModel, idSpawneur : int) : void{
+	def addAgentToTheSimulation(model : CarModel, idSpawneur : int) : void {
 		var id = spawn(Conducteur)
 		var point = this.roadNetwork.impasses.get(idSpawneur)
 		var segment = point.getConnectedSegment(0)

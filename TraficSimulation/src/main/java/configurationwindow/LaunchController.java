@@ -9,9 +9,12 @@ import java.util.ResourceBundle;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import configfile.CarConfig;
-import javafx.collections.FXCollections;
+import environnement.Simulation;
+import io.sarl.bootstrap.SRE;
+import io.sarl.bootstrap.SREBootstrap;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -67,31 +70,15 @@ public class LaunchController implements Initializable {
 	
 	ObjectMapper objectMapper = new ObjectMapper();
 	private Stage stage;
-	
-	private ObservableList<CarConfig> carConfigList = FXCollections.observableArrayList();
-	private File shapeFile;
+	private LaunchWindow launcher;
+
 	
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		
 		
-		carTableView.setItems(carConfigList);
 		
-		
-		carConfigList.addListener(new ListChangeListener<CarConfig>() {
-
-			@Override
-			public void onChanged(javafx.collections.ListChangeListener.Change<? extends CarConfig> c) {
-				if(carConfigList.isEmpty()){
-					nextButton.setDisable(true);
-				}else if(shapeFile != null){
-					nextButton.setDisable(false);
-				}
-				
-			}
-			
-		});
 		
 
 		carNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -184,12 +171,12 @@ public class LaunchController implements Initializable {
 		
 		
 		addButton.setOnAction((event) ->{ 
-			carConfigList.add(new CarConfig("New Car", 0,0,0,0,Color.WHITE,0));
+			Configuration.getInstance().getCarConfigList().add(new CarConfig("New Car", 0,0,0,0,Color.WHITE,0));
 		});
 		
 		deleteButton.setOnAction((event) -> {
 			try{
-				carConfigList.remove(carTableView.getSelectionModel().getSelectedIndex());
+				Configuration.getInstance().getCarConfigList().remove(carTableView.getSelectionModel().getSelectedIndex());
 			}catch(ArrayIndexOutOfBoundsException e){
 				
 			}
@@ -211,8 +198,8 @@ public class LaunchController implements Initializable {
 		    if (selectedFile != null) {
 			    try {
 					ArrayList<CarConfig> importedCarConfig = objectMapper.readValue(selectedFile, objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, CarConfig.class));
-					carConfigList.clear();
-					carConfigList.addAll(importedCarConfig);
+					Configuration.getInstance().getCarConfigList().clear();
+					Configuration.getInstance().getCarConfigList().addAll(importedCarConfig);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -234,7 +221,7 @@ public class LaunchController implements Initializable {
 		    
 		    if (selectedFile != null) {
 		       try {
-		    	   objectMapper.writeValue(selectedFile, carConfigList);
+		    	   objectMapper.writeValue(selectedFile, Configuration.getInstance().getCarConfigList());
 		       } catch (IOException e) {
 		    	   // TODO Auto-generated catch block
 		    	   e.printStackTrace();
@@ -256,9 +243,9 @@ public class LaunchController implements Initializable {
 		    File selectedFile = fileChooser.showOpenDialog(stage);
 		    
 		    if (selectedFile != null) {
-		    	shapeFile = selectedFile;
-		    	shapeFileNameLabel.setText(shapeFile.getAbsolutePath());
-		    	if(!carConfigList.isEmpty()){
+		    	Configuration.getInstance().setShapeFile(selectedFile);
+		    	shapeFileNameLabel.setText(Configuration.getInstance().getShapeFile().getAbsolutePath());
+		    	if(!Configuration.getInstance().getCarConfigList().isEmpty()){
 		    		nextButton.setDisable(false);
 		    	}
 		    }
@@ -268,20 +255,35 @@ public class LaunchController implements Initializable {
 		cancelButton.setOnAction((event)->{
 			stage.close();
 		});
+		
+		nextButton.setOnAction((event)->{
+			Configuration.setValid(true);
+			stage.close();
+			
+		});
 	}
 	
 	
 	
-	public ObservableList<CarConfig> getCarConfigList() {
-		return carConfigList;
+	public void setLauncher(LaunchWindow launcher) {
+		this.launcher = launcher;
+		carTableView.setItems(Configuration.getInstance().getCarConfigList());
+		
+		
+		Configuration.getInstance().getCarConfigList().addListener(new ListChangeListener<CarConfig>() {
+
+			@Override
+			public void onChanged(javafx.collections.ListChangeListener.Change<? extends CarConfig> c) {
+				if(Configuration.getInstance().getCarConfigList().isEmpty()){
+					nextButton.setDisable(true);
+				}else if(Configuration.getInstance().getShapeFile() != null){
+					nextButton.setDisable(false);
+				}
+				
+			}
+			
+		});
 	}
-
-
-
-	public File getShapeFile() {
-		return shapeFile;
-	}
-
 
 
 	public void setStage(Stage stage){

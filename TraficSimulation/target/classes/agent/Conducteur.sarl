@@ -39,7 +39,6 @@ agent Conducteur {
 		killMe()
 	}
 	 
-	
 	/**
 	 * Reçu à la fin du traitement des perceptions par l'environnement
 	 */

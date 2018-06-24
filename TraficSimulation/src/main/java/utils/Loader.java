@@ -31,18 +31,13 @@ import traficWindow.RoadRenderer;
 public class Loader {
 	/**
 	 * Charge le fichier shapefile et son fichier de DB associé
-	 * @param fileDesc Chemin du fichier
+	 * @param file Fichier
 	 * @return RoadNetwork créé à partir du fichier
 	 */
 	@SuppressWarnings("unused")
-	public static PersonalizedRoadNetwork loadShapeFile(String fileDesc) {
-		File file;
+	public static PersonalizedRoadNetwork loadShapeFile(File file) {
+
 		
-		try {
-			file = new File(RoadRenderer.class.getResource(fileDesc).toURI());
-		} catch(URISyntaxException e) {
-			file = new File(RoadRenderer.class.getResource(fileDesc).getPath());
-		} 
 		
 		try {
 			PersonalizedRoadNetwork network = null;
