@@ -63,6 +63,8 @@ public class LaunchController implements Initializable {
 	@FXML
 	private TableColumn<CarConfig, String> maxDecelerationColumn;
 	@FXML
+	private TableColumn<CarConfig, String> viewDistanceColumn;
+	@FXML
 	private TableColumn<CarConfig, String> colorColumn;
 	@FXML
 	private TableColumn<CarConfig, String> agentsColumn;
@@ -149,6 +151,19 @@ public class LaunchController implements Initializable {
 	                }
 	            }
 	        );
+		
+		viewDistanceColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+		viewDistanceColumn.setOnEditCommit(
+	            new EventHandler<CellEditEvent<CarConfig, String>>() {
+	                @Override
+	                public void handle(CellEditEvent<CarConfig, String> t) {
+	                    ((CarConfig) t.getTableView().getItems().get(
+	                            t.getTablePosition().getRow())
+	                            ).setViewDistance(Float.parseFloat(t.getNewValue()));
+	                }
+	            }
+	        );
+		
 		colorColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 		colorColumn.setOnEditCommit(
 	            new EventHandler<CellEditEvent<CarConfig, String>>() {
@@ -178,13 +193,14 @@ public class LaunchController implements Initializable {
 		maxSpeedColumn.setCellValueFactory(cellData -> cellData.getValue().maxSpeedProperty().asString());
 		maxAccelerationColumn.setCellValueFactory(cellData -> cellData.getValue().maxAccelProperty().asString());
 		maxDecelerationColumn.setCellValueFactory(cellData -> cellData.getValue().maxDecelProperty().asString());
+		viewDistanceColumn.setCellValueFactory(cellData -> cellData.getValue().viewDistanceProperty().asString());
 		colorColumn.setCellValueFactory(cellData -> cellData.getValue().colorProperty().asString());
 		agentsColumn.setCellValueFactory(cellData -> cellData.getValue().agentNumberProperty().asString());
 		
 		
 		
 		addButton.setOnAction((event) ->{ 
-			Configuration.getInstance().getCarConfigList().add(new CarConfig("New Car", 0,0,0,0,Color.WHITE,0));
+			Configuration.getInstance().getCarConfigList().add(new CarConfig("New Car", 0,0,0,0,0,Color.WHITE,0));
 		});
 		
 		deleteButton.setOnAction((event) -> {

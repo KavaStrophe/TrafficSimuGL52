@@ -25,6 +25,7 @@ public class CarConfig {
 	private FloatProperty maxSpeed;
 	private FloatProperty maxAccel;
 	private FloatProperty maxDecel;
+	private FloatProperty viewDistance;
 	private ObjectProperty<Color> color;
 	private IntegerProperty agentNumber;
 	
@@ -39,13 +40,14 @@ public class CarConfig {
 	 * @param color
 	 * @param agentNumber
 	 */
-	public CarConfig(String name, float lenght, float maxSpeed, float maxAccel, float maxDecel,  Color color, int agentNumber) {
+	public CarConfig(String name, float lenght, float maxSpeed, float maxAccel, float maxDecel, float viewDistance, Color color, int agentNumber) {
 		super();
 		this.name = new SimpleStringProperty(name);
 		this.lenght =  new SimpleFloatProperty(lenght);
 		this.maxSpeed = new SimpleFloatProperty(maxSpeed);
 		this.maxAccel = new SimpleFloatProperty(maxAccel);
 		this.maxDecel = new SimpleFloatProperty(maxDecel);
+		this.viewDistance = new SimpleFloatProperty(viewDistance);
 		this.color = new SimpleObjectProperty<Color>(color);
 		this.agentNumber = new SimpleIntegerProperty(agentNumber);
 	}
@@ -78,6 +80,11 @@ public class CarConfig {
     public IntegerProperty agentNumberProperty() {
         return agentNumber;
     }
+    
+    public FloatProperty viewDistanceProperty() {
+        return viewDistance;
+    }
+    
     
     
 	public String getName() {
@@ -123,6 +130,16 @@ public class CarConfig {
 
 	public void setAgentNumber(int agentNumber) {
 		this.agentNumber.set(agentNumber);
+	}
+
+
+	public float getViewDistance() {
+		return viewDistance.get();
+	}
+
+
+	public void setViewDistance(float viewDistance) {
+		this.viewDistance.set(viewDistance);
 	}
 	
 }

@@ -35,7 +35,7 @@ public class CarConfigDeserializer extends StdDeserializer<CarConfig> {
 
 		CarConfig car = new CarConfig(node.get("name").asText(), node.get("lenght").numberValue().floatValue(),
 				node.get("maxSpeed").numberValue().floatValue(), node.get("maxAccel").numberValue().floatValue(),
-				node.get("maxDecel").numberValue().floatValue(),
+				node.get("maxDecel").numberValue().floatValue(), node.get("viewDistance").numberValue().floatValue(),
 				new Color(node.get("color").get("red").numberValue().doubleValue(),
 						node.get("color").get("green").numberValue().doubleValue(),
 						node.get("color").get("blue").numberValue().doubleValue(),
